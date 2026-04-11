@@ -7,7 +7,7 @@ export interface IJob extends Document {
   location: string;
   description: string;
   applicantsCount: number;
-  status: "Active" | "Closed" | "Draft";
+  status: "Active" | "Closed" | "Draft" | "Archived";
   screeningCriteria?: string;
   ownerId: string;
 }
@@ -20,7 +20,7 @@ const JobSchema: Schema = new Schema(
     location: { type: String, required: true },
     description: { type: String, required: true },
     applicantsCount: { type: Number, default: 0 },
-    status: { type: String, enum: ["Active", "Closed", "Draft"], default: "Active" },
+    status: { type: String, enum: ["Active", "Closed", "Draft", "Archived"], default: "Active" },
     screeningCriteria: { type: String, default: "" },
     ownerId: { type: String, required: true },
   },

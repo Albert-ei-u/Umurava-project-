@@ -5,9 +5,11 @@ export interface IScreening extends Document {
   candidateId: string;
   candidateName?: string;
   candidateEmail?: string;
+  candidateGender?: "M" | "F" | "Not stated";
   matchScore: number;
+
   strengths: string[];
-  gaps: string[];
+  weaknesses: string[];
   finalRecommendation: "Priority Alignment" | "Technical Fit" | "Potential Fit" | "No Alignment";
   reasoning: string;
   createdAt: Date;
@@ -20,9 +22,11 @@ const ScreeningSchema: Schema = new Schema(
     candidateId: { type: String, required: true },
     candidateName: { type: String },
     candidateEmail: { type: String },
+    candidateGender: { type: String, enum: ["M", "F", "Not stated"], default: "Not stated" },
     matchScore: { type: Number, required: true },
+
     strengths: [{ type: String }],
-    gaps: [{ type: String }],
+    weaknesses: [{ type: String }],
     finalRecommendation: { 
       type: String, 
       enum: ["Priority Alignment", "Technical Fit", "Potential Fit", "No Alignment"],

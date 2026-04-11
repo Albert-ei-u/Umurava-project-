@@ -12,7 +12,7 @@ import {
   faXmark,
   faCheckCircle,
 } from "@fortawesome/free-solid-svg-icons";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 export default function FileUploadZone() {
   const [files, setFiles] = useState<File[]>([]);

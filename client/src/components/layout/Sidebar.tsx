@@ -13,6 +13,7 @@ import {
   Activity,
   X,
   Bot,
+  Clock,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -53,8 +54,8 @@ const Sidebar = ({ onClose }: SidebarProps) => {
   ];
 
   return (
-    <div className="w-72 bg-aurora-surface border-r border-aurora-border flex flex-col h-full shadow-2xl lg:shadow-none">
-      <div className="p-8 border-b border-aurora-border/50 flex items-center justify-between">
+    <div className="w-72 bg-scrutiq-surface border-r border-scrutiq-border flex flex-col h-full shadow-2xl lg:shadow-none">
+      <div className="p-8 border-b border-scrutiq-border/50 flex items-center justify-between">
         <Link
           href="/dashboard"
           className="flex items-center gap-3 group"
@@ -62,17 +63,17 @@ const Sidebar = ({ onClose }: SidebarProps) => {
         >
           <img src="/Untitled_design-removebg-preview.svg" alt="Scrutiq" className="size-10 group-hover:rotate-6 transition-all duration-500" />
           <div>
-            <h1 className="text-xl font-black text-aurora-dark tracking-tighter leading-none group-hover:text-aurora-blue transition-colors">
+            <h1 className="text-xl font-black text-scrutiq-dark tracking-tighter leading-none group-hover:text-scrutiq-blue transition-colors">
               Scrutiq
             </h1>
-            <span className="text-[11px] font-bold text-aurora-muted tracking-widest">
+            <span className="text-[11px] font-bold text-scrutiq-muted tracking-widest">
               Recruitment portal
             </span>
           </div>
         </Link>
         <button
           onClick={onClose}
-          className="lg:hidden p-2 text-aurora-muted hover:text-aurora-blue transition-colors"
+          className="lg:hidden p-2 text-scrutiq-muted hover:text-scrutiq-blue transition-colors"
         >
           <X className="size-5" />
         </button>
@@ -90,15 +91,15 @@ const Sidebar = ({ onClose }: SidebarProps) => {
               onClick={onClose}
               className={`flex items-center gap-4 px-5 py-4 rounded-2xl transition-all group ${
                 isActive
-                  ? "bg-white text-aurora-blue shadow-lg shadow-aurora-blue/5 border border-aurora-border/50 scale-[1.02]"
-                  : "text-aurora-muted hover:bg-white hover:text-aurora-dark hover:shadow-sm"
+                  ? "bg-white text-scrutiq-blue shadow-lg shadow-scrutiq-blue/5 border border-scrutiq-border/50 scale-[1.02]"
+                  : "text-scrutiq-muted hover:bg-white hover:text-scrutiq-dark hover:shadow-sm"
               }`}
             >
               <item.icon
-                className={`size-5.5 ${isActive ? "text-aurora-blue" : "text-aurora-muted group-hover:text-aurora-blue transition-colors"}`}
+                className={`size-5.5 ${isActive ? "text-scrutiq-blue" : "text-scrutiq-muted group-hover:text-scrutiq-blue transition-colors"}`}
               />
               <span
-                className={`text-[15px] font-bold tracking-tight ${isActive ? "text-aurora-blue" : ""}`}
+                className={`text-[15px] font-bold tracking-tight ${isActive ? "text-scrutiq-blue" : ""}`}
               >
                 {item.name}
               </span>
@@ -107,28 +108,31 @@ const Sidebar = ({ onClose }: SidebarProps) => {
         })}
       </nav>
 
-      <div className="p-6 border-t border-aurora-border/50">
-        <div className="bg-aurora-bg p-5 rounded-2xl border border-aurora-border/50 relative overflow-hidden group">
+      <div className="p-6 border-t border-scrutiq-border/50">
+        <div className="bg-scrutiq-bg p-5 rounded-2xl border border-scrutiq-border/50 relative overflow-hidden group">
           <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-            <Activity className="size-12 text-aurora-blue" />
+            <Activity className="size-12 text-scrutiq-blue" />
           </div>
-          <p className="text-[10px] font-black text-aurora-muted tracking-widest mb-1.5 flex items-center justify-between">
+          <p className="text-[10px] font-black text-scrutiq-muted tracking-widest mb-1.5 flex items-center justify-between">
             System status
-            <span className="text-aurora-blue animate-pulse">●</span>
+            <span className="text-emerald-500">●</span>
           </p>
           <div className="space-y-1 relative z-10">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-black text-aurora-dark tracking-tight">
+              <span className="text-xs font-black text-scrutiq-dark tracking-tight">
                 All systems
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-[9px] font-bold text-aurora-muted tracking-widest">
+              <span className="text-[9px] font-bold text-scrutiq-muted tracking-widest">
                 Online & Synced
               </span>
-              <span className="text-[9px] font-black text-aurora-blue tracking-widest">
-                {lastUpdate}
-              </span>
+              <div className="flex items-center gap-1">
+                <Clock className="size-2.5 text-scrutiq-blue" />
+                <span className="text-[9px] font-black text-scrutiq-blue tracking-widest">
+                  {lastUpdate}
+                </span>
+              </div>
             </div>
           </div>
         </div>

@@ -19,7 +19,7 @@ import {
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import api from "@/lib/api";
 import { useNotifications } from "@/context/NotificationContext";
 
@@ -36,6 +36,9 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
     notifications: localNotifs,
     removeNotification,
     snoozeNotification,
+    toggleExpandNotification,
+    contractAll,
+    clearAll,
   } = useNotifications();
   const router = useRouter();
   const [showNotifications, setShowNotifications] = useState(false);
@@ -54,6 +57,7 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
         !notificationsRef.current.contains(event.target as Node)
       ) {
         setShowNotifications(false);
+        contractAll();
       }
       if (
         profileRef.current &&
@@ -104,7 +108,12 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
 
   const handleSignOut = () => {
     toast.info("Signing out of your company portal...");
+    
+    // Purge local session persistence
     localStorage.removeItem("user");
+    localStorage.removeItem("umurava_chat_history_v1");
+    localStorage.removeItem("umurava_notifications_v1");
+    
     setTimeout(() => {
       router.push("/login");
       toast.success("You have been signed out.");
@@ -124,24 +133,24 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
   const breadcrumbs = getBreadcrumbs();
 
   return (
-    <header className="h-20 bg-aurora-surface border-b border-aurora-border flex items-center justify-between px-4 md:px-8 relative z-30">
+    <header className="h-20 bg-scrutiq-surface border-b border-scrutiq-border flex items-center justify-between px-4 md:px-8 relative z-30">
       <div className="flex items-center gap-2 md:gap-4">
         <button
           onClick={onMenuClick}
-          className="lg:hidden p-2 text-aurora-muted hover:text-aurora-blue transition-colors"
+          className="lg:hidden p-2 text-scrutiq-muted hover:text-scrutiq-blue transition-colors"
         >
           <Menu className="size-5" />
         </button>
-        <div className="flex items-center gap-2 text-[10px] md:text-xs font-bold tracking-widest text-aurora-muted">
+        <div className="flex items-center gap-2 text-[10px] md:text-xs font-bold tracking-widest text-scrutiq-muted">
           <span className="hidden sm:inline">
             {user?.company || "Company registry"}
           </span>
-          <ChevronRight className="size-3 text-aurora-blue hidden sm:inline" />
+          <ChevronRight className="size-3 text-scrutiq-blue hidden sm:inline" />
           {breadcrumbs.slice(-2).map((crumb, i) => (
             <div key={crumb.href} className="flex items-center gap-2">
               <Link
                 href={crumb.href}
-                className={`hover:text-aurora-blue transition-colors ${i === breadcrumbs.slice(-2).length - 1 ? "text-aurora-dark" : ""}`}
+                className={`hover:text-scrutiq-blue transition-colors ${i === breadcrumbs.slice(-2).length - 1 ? "text-scrutiq-dark" : ""}`}
               >
                 {crumb.name}
               </Link>
@@ -154,8 +163,8 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
       </div>
 
       <div className="flex items-center gap-3 md:gap-6">
-        <div className="relative group hidden md:flex items-center bg-aurora-bg border border-aurora-border rounded-xl px-4 py-2 w-48 lg:w-80 focus-within:border-aurora-blue focus-within:ring-4 focus-within:ring-aurora-blue/5 transition-all">
-          <Search className="size-4 text-aurora-muted group-focus-within:text-aurora-blue" />
+        <div className="relative group hidden md:flex items-center bg-scrutiq-bg border border-scrutiq-border rounded-xl px-4 py-2 w-48 lg:w-80 focus-within:border-scrutiq-blue focus-within:ring-4 focus-within:ring-scrutiq-blue/5 transition-all">
+          <Search className="size-4 text-scrutiq-muted group-focus-within:text-scrutiq-blue" />
           <form 
             onSubmit={(e) => {
               e.preventDefault();
@@ -170,13 +179,13 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
               placeholder="Search resumes..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="bg-transparent border-none outline-none text-[10px] lg:text-xs font-bold text-aurora-dark ml-2.5 w-full tracking-wider placeholder:text-aurora-muted/50"
+              className="bg-transparent border-none outline-none text-[10px] lg:text-xs font-bold text-scrutiq-dark ml-2.5 w-full tracking-wider placeholder:text-scrutiq-muted/50"
             />
           </form>
           {searchQuery && (
             <button 
               onClick={() => setSearchQuery("")}
-              className="ml-2 p-0.5 text-aurora-muted hover:text-aurora-dark transition-colors"
+              className="ml-2 p-0.5 text-scrutiq-muted hover:text-scrutiq-dark transition-colors"
             >
               <X className="size-3" />
             </button>
@@ -191,8 +200,8 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
             }}
             className={`relative p-2 transition-all rounded-xl border ${
               showNotifications
-                ? "bg-aurora-blue/5 border-aurora-blue/20 text-aurora-blue"
-                : "text-aurora-muted hover:bg-aurora-bg hover:text-aurora-dark border-transparent hover:border-aurora-border"
+                ? "bg-scrutiq-blue/5 border-scrutiq-blue/20 text-scrutiq-blue"
+                : "text-scrutiq-muted hover:bg-scrutiq-bg hover:text-scrutiq-dark border-transparent hover:border-scrutiq-border"
             }`}
           >
             <Bell className="size-5" />
@@ -207,62 +216,114 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute right-0 mt-3 w-80 bg-aurora-surface border border-aurora-border rounded-2xl shadow-xl overflow-hidden"
+                className="fixed md:absolute top-[70px] md:top-auto right-4 md:right-0 mt-3 w-[calc(100vw-2rem)] sm:w-[24rem] md:w-[22rem] bg-scrutiq-surface border border-scrutiq-border rounded-2xl shadow-xl overflow-hidden z-[100]"
               >
-                <div className="p-4 border-b border-aurora-border/50 bg-aurora-bg/30">
-                  <p className="text-[10px] font-bold text-aurora-dark tracking-widest">
-                    Recent activity
+                <div className="p-4 border-b border-scrutiq-border/50 bg-scrutiq-bg/30 flex items-center justify-between">
+                  <p className="text-[10px] font-bold text-scrutiq-dark tracking-widest uppercase">
+                    Notifications
                   </p>
+                  {localNotifs.length > 0 && (
+                    <button 
+                      onClick={() => {
+                        if (window.confirm("Are you sure you want to delete all notifications? This action cannot be undone.")) {
+                          clearAll();
+                        }
+                      }}
+                      className="text-[9px] font-bold text-rose-500 hover:text-rose-600 transition-colors tracking-widest uppercase"
+                    >
+                      Clear All
+                    </button>
+                  )}
+
                 </div>
-                <div className="divide-y divide-aurora-border/30 max-h-96 overflow-y-auto">
+                <div className="divide-y divide-scrutiq-border/30 max-h-[28rem] overflow-y-auto custom-scrollbar">
                   {allNotifications.length === 0 ? (
-                    <div className="p-6 text-center text-[10px] font-bold tracking-widest text-aurora-muted">
-                      No unread notifications
+                    <div className="p-10 text-center flex flex-col items-center gap-3">
+                      <div className="size-10 rounded-full bg-scrutiq-bg flex items-center justify-center text-scrutiq-muted">
+                        <Bell className="size-5 opacity-20" />
+                      </div>
+                      <p className="text-[10px] font-bold tracking-widest text-scrutiq-muted uppercase">
+                        Clean slate
+                      </p>
                     </div>
                   ) : (
                     allNotifications.map((n, idx) => {
-                      const isRecent = "timestamp" in n; // Check if it's from context
+                      const isLocal = "timestamp" in n;
+                      const type = n.type || "info";
+                      
+                      const iconMap = {
+                        success: <CheckCircle2 className="size-4 text-emerald-500" />,
+                        error: <AlertCircle className="size-4 text-rose-500" />,
+                        warning: <AlertCircle className="size-4 text-amber-500" />,
+                        info: <Bell className="size-4 text-scrutiq-blue" />,
+                      };
+
+                      const timeAgo = (ts: number) => {
+                        const seconds = Math.floor((Date.now() - ts) / 1000);
+                        if (seconds < 60) return "Just now";
+                        const minutes = Math.floor(seconds / 60);
+                        if (minutes < 60) return `${minutes}m ago`;
+                        const hours = Math.floor(minutes / 60);
+                        if (hours < 24) return `${hours}h ago`;
+                        return `${Math.floor(hours / 24)}d ago`;
+                      };
+
                       return (
                         <div
                           key={n.id || idx}
-                          className="p-4 hover:bg-aurora-bg/50 transition-colors cursor-pointer group flex items-start gap-4"
+                          onClick={() => isLocal && toggleExpandNotification(n.id)}
+                          className={`p-4 hover:bg-scrutiq-bg transition-all cursor-pointer group flex items-start gap-4 ${n.isExpanded ? "bg-scrutiq-bg/30" : ""}`}
                         >
-                          <Bell
-                            className={`size-4 mt-0.5 ${isRecent ? "text-aurora-blue" : "text-aurora-muted"}`}
-                          />
+                          <div className={`mt-0.5 size-8 rounded-lg flex items-center justify-center shrink-0 ${
+                            type === "success" ? "bg-emerald-500/5" :
+                            type === "error" ? "bg-rose-500/5" :
+                            type === "warning" ? "bg-amber-500/5" : "bg-scrutiq-blue/5"
+                          }`}>
+                            {iconMap[type as keyof typeof iconMap] || iconMap.info}
+                          </div>
+                          
                           <div className="flex-1 min-w-0">
-                            <p className="text-xs font-bold text-aurora-dark tracking-tight group-hover:text-aurora-blue transition-colors truncate">
+                            <p className={`text-xs font-bold text-scrutiq-dark tracking-tight transition-colors ${n.isExpanded ? "" : "truncate"}`}>
                               {n.title || n.message}
                             </p>
-                            <p className="text-[10px] font-bold text-aurora-muted tracking-widest mt-0.5">
-                              {n.time || "Just now"}
-                            </p>
-                          </div>
-                          {isRecent && (
-                            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  removeNotification(n.id);
-                                  toast.success("Notification viewed.");
-                                }}
-                                className="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-all"
-                                title="Mark Viewed"
-                              >
-                                <Check className="size-3" />
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  snoozeNotification(n.id);
-                                }}
-                                className="p-1.5 bg-amber-50 text-amber-600 rounded-lg hover:bg-amber-100 transition-all"
-                                title="Snooze 5m"
-                              >
-                                <Clock className="size-3" />
-                              </button>
+                            <div className="flex items-center gap-2 mt-1">
+                              <p className="text-[9px] font-bold text-scrutiq-muted tracking-widest uppercase">
+                                {isLocal ? timeAgo(n.timestamp) : (n.time || "Recent")}
+                              </p>
+                              {n.isExpanded && (
+                                <span className="text-[9px] font-bold text-scrutiq-blue tracking-widest uppercase px-1.5 py-0.5 bg-scrutiq-blue/5 rounded">
+                                  Expanded
+                                </span>
+                              )}
                             </div>
-                          )}
+                          </div>
+
+                          <div className="flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            {isLocal && (
+                              <>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    removeNotification(n.id);
+                                  }}
+                                  className="p-1.5 text-scrutiq-muted hover:text-rose-500 transition-colors"
+                                  title="Dismiss"
+                                >
+                                  <X className="size-3.5" />
+                                </button>
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    snoozeNotification(n.id);
+                                  }}
+                                  className="p-1.5 text-scrutiq-muted hover:text-amber-500 transition-colors"
+                                  title="Snooze"
+                                >
+                                  <Clock className="size-3.5" />
+                                </button>
+                              </>
+                            )}
+                          </div>
                         </div>
                       );
                     })
@@ -273,17 +334,17 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
           </AnimatePresence>
         </div>
 
-        <div className="h-8 w-px bg-aurora-border mx-2" />
+        <div className="h-8 w-px bg-scrutiq-border mx-2" />
 
         <div className="relative" ref={profileRef}>
           <div className="flex items-center gap-3 pl-2">
             <div className="text-right hidden sm:block">
-              <p className="text-xs font-bold text-aurora-dark tracking-tight truncate max-w-[120px]">
+              <p className="text-xs font-bold text-scrutiq-dark tracking-tight truncate max-w-[120px]">
                 {user?.name 
                   ? user.name.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
                   : "Recruiter"}
               </p>
-              <p className="text-[10px] font-bold text-aurora-blue tracking-widest leading-none">
+              <p className="text-[10px] font-bold text-scrutiq-blue tracking-widest leading-none">
                 Technical portal
               </p>
             </div>
@@ -294,12 +355,12 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
               }}
               className={`size-10 rounded-xl border flex items-center justify-center transition-all overflow-hidden group ${
                 showProfile
-                  ? "bg-aurora-blue/5 border-aurora-blue/20"
-                  : "bg-aurora-bg border-aurora-border hover:bg-aurora-surface"
+                  ? "bg-scrutiq-blue/5 border-scrutiq-blue/20"
+                  : "bg-scrutiq-bg border-scrutiq-border hover:bg-scrutiq-surface"
               }`}
             >
               <User
-                className={`size-5 ${showProfile ? "text-aurora-blue" : "text-aurora-muted group-hover:text-aurora-blue"}`}
+                className={`size-5 ${showProfile ? "text-scrutiq-blue" : "text-scrutiq-muted group-hover:text-scrutiq-blue"}`}
               />
             </button>
           </div>
@@ -310,20 +371,20 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute right-0 mt-3 w-56 bg-aurora-surface border border-aurora-border rounded-2xl shadow-xl overflow-hidden"
+                className="fixed md:absolute top-[70px] md:top-auto right-4 md:right-0 mt-3 w-64 md:w-56 bg-scrutiq-surface border border-scrutiq-border rounded-2xl shadow-xl overflow-hidden z-[100]"
               >
                 <div className="p-2">
-                  <div className="px-4 py-3 mb-2 border-b border-aurora-border/50">
-                    <p className="text-[10px] font-bold text-aurora-muted tracking-widest">
+                  <div className="px-4 py-3 mb-2 border-b border-scrutiq-border/50">
+                    <p className="text-[10px] font-bold text-scrutiq-muted tracking-widest">
                       Company account
                     </p>
-                    <p className="text-xs font-bold text-aurora-dark truncate">
-                      {user?.company || "Aurora"}
+                    <p className="text-xs font-bold text-scrutiq-dark truncate">
+                      {user?.company || "Scrutiq"}
                     </p>
                   </div>
                   <Link
                     href="/dashboard/settings"
-                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-aurora-bg text-aurora-muted hover:text-aurora-dark transition-all"
+                    className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-scrutiq-bg text-scrutiq-muted hover:text-scrutiq-dark transition-all"
                   >
                     <Settings className="size-4" />
                     <span className="text-[11px] font-bold tracking-widest">
@@ -332,7 +393,7 @@ const Navbar = ({ onMenuClick }: NavbarProps) => {
                   </Link>
                   <button
                     onClick={handleSignOut}
-                    className="flex w-full items-center gap-3 px-4 py-3 rounded-xl hover:bg-aurora-bg text-aurora-muted hover:text-rose-500 transition-all text-left"
+                    className="flex w-full items-center gap-3 px-4 py-3 rounded-xl hover:bg-scrutiq-bg text-scrutiq-muted hover:text-rose-500 transition-all text-left"
                   >
                     <LogOut className="size-4" />
                     <span className="text-[11px] font-bold tracking-widest">

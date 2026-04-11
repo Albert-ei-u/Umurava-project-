@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { X, Send, Mail, User, BookOpen, RefreshCcw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import api from "@/lib/api";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 interface ContactModalProps {
   applicant: any;
@@ -66,48 +66,48 @@ export default function ContactModal({ applicant, isOpen, onClose }: ContactModa
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-aurora-dark/20 backdrop-blur-sm"
+            className="absolute inset-0 bg-scrutiq-dark/20 backdrop-blur-sm"
           />
           
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-aurora-border"
+            className="relative w-full max-w-xl bg-white rounded-3xl shadow-2xl overflow-hidden border border-scrutiq-border"
           >
-            <div className="p-8 border-b border-aurora-border flex items-center justify-between bg-aurora-bg/30">
+            <div className="p-8 border-b border-scrutiq-border flex items-center justify-between bg-scrutiq-bg/30">
               <div className="flex items-center gap-4">
-                <div className="size-12 rounded-2xl bg-aurora-blue flex items-center justify-center text-white shadow-lg shadow-aurora-blue/20">
+                <div className="size-12 rounded-2xl bg-scrutiq-blue flex items-center justify-center text-white shadow-lg shadow-scrutiq-blue/20">
                   <Mail className="size-6" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-black text-aurora-dark tracking-tight">Send Email</h2>
-                  <p className="text-[10px] font-bold text-aurora-muted tracking-widest uppercase">To {applicant?.name}</p>
+                  <h2 className="text-xl font-black text-scrutiq-dark tracking-tight">Send Email</h2>
+                  <p className="text-[10px] font-bold text-scrutiq-muted tracking-widest uppercase">To {applicant?.name}</p>
                 </div>
               </div>
               <button 
                 onClick={onClose}
-                className="p-2 hover:bg-white rounded-xl transition-all border border-transparent hover:border-aurora-border"
+                className="p-2 hover:bg-white rounded-xl transition-all border border-transparent hover:border-scrutiq-border"
               >
-                <X className="size-5 text-aurora-muted" />
+                <X className="size-5 text-scrutiq-muted" />
               </button>
             </div>
 
             <div className="p-8 space-y-6">
               <div className="space-y-4">
-                 <div className="flex items-center gap-3 p-3 bg-aurora-bg rounded-xl border border-aurora-border/50 focus-within:border-aurora-blue focus-within:ring-4 focus-within:ring-aurora-blue/5 transition-all">
-                    <User className="size-4 text-aurora-blue" />
+                 <div className="flex items-center gap-3 p-3 bg-scrutiq-bg rounded-xl border border-scrutiq-border/50 focus-within:border-scrutiq-blue focus-within:ring-4 focus-within:ring-scrutiq-blue/5 transition-all">
+                    <User className="size-4 text-scrutiq-blue" />
                     <input 
                       type="email"
                       value={customEmail}
                       onChange={(e) => setCustomEmail(e.target.value)}
-                      className="text-xs font-bold text-aurora-dark bg-transparent border-none outline-none w-full"
+                      className="text-xs font-bold text-scrutiq-dark bg-transparent border-none outline-none w-full"
                       placeholder="Recipient email address"
                     />
                  </div>
 
                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-aurora-muted tracking-widest uppercase ml-1">Subject line</label>
+                    <label className="text-[10px] font-black text-scrutiq-muted tracking-widest uppercase ml-1">Subject line</label>
                     <input 
                       type="text"
                       value={subject}
@@ -118,7 +118,7 @@ export default function ContactModal({ applicant, isOpen, onClose }: ContactModa
                  </div>
 
                  <div className="space-y-1.5">
-                    <label className="text-[10px] font-black text-aurora-muted tracking-widest uppercase ml-1">Message content</label>
+                    <label className="text-[10px] font-black text-scrutiq-muted tracking-widest uppercase ml-1">Message content</label>
                     <textarea 
                       rows={6}
                       value={message}
@@ -130,7 +130,7 @@ export default function ContactModal({ applicant, isOpen, onClose }: ContactModa
               </div>
 
               <div className="flex items-center justify-between pt-4">
-                 <p className="text-[10px] font-bold text-aurora-muted tracking-wide max-w-[240px]">
+                 <p className="text-[10px] font-bold text-scrutiq-muted tracking-wide max-w-[240px]">
                    This email will be sent using your configured email settings.
                  </p>
                  <div className="flex gap-3">
@@ -144,7 +144,7 @@ export default function ContactModal({ applicant, isOpen, onClose }: ContactModa
                    <button 
                     onClick={handleSend}
                     disabled={isSending}
-                    className="btn-primary px-8 flex items-center gap-2 shadow-xl shadow-aurora-blue/30 disabled:opacity-50"
+                    className="btn-primary px-8 flex items-center gap-2 shadow-xl shadow-scrutiq-blue/30 disabled:opacity-50"
                    >
                      {isSending ? (
                        <RefreshCcw className="size-4 animate-spin" />

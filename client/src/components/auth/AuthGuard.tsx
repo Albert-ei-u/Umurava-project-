@@ -21,9 +21,9 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
   if (isLoading) {
     return (
-      <div className="h-screen w-full flex flex-col items-center justify-center bg-aurora-bg space-y-4">
-        <RefreshCcw className="size-10 text-aurora-blue animate-spin" />
-        <p className="text-xs font-black text-aurora-muted uppercase tracking-widest">Checking session...</p>
+      <div className="h-screen w-full flex flex-col items-center justify-center bg-scrutiq-bg space-y-4">
+        <RefreshCcw className="size-10 text-scrutiq-blue animate-spin" />
+        <p className="text-xs font-black text-scrutiq-muted uppercase tracking-widest">Checking session...</p>
       </div>
     );
   }

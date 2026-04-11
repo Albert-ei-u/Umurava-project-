@@ -34,4 +34,7 @@ router.post(
 // Individual Outreach Dispatch
 router.post("/:id/email", applicantsController.sendEmail);
 
+// Duplicate Management
+router.post("/:id/resolve-duplicate", applicantsController.handleResolveDuplicate);
+
 export default router;

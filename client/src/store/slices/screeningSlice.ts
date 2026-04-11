@@ -7,7 +7,7 @@ export interface ScreeningResult {
   candidateName: string;
   matchScore: number;
   strengths: string[];
-  gaps: string[];
+  weaknesses: string[];
   reasoning: string;
   finalRecommendation:
     | "Priority Alignment"

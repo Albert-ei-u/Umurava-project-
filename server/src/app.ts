@@ -18,7 +18,11 @@ import chatRoutes from "./routes/chat.routes";
 const app: Express = express();
 
 // Standard Technical Middleware
-app.use(helmet());
+app.use(helmet({
+  contentSecurityPolicy: false, // Disabling CSP for development to allow all resource types in iframes
+  crossOriginResourcePolicy: false,
+  crossOriginEmbedderPolicy: false
+}));
 app.use(morgan("dev"));
 app.use(cors({
   origin: process.env.CLIENT_URL || "http://localhost:3000",
@@ -27,7 +31,14 @@ app.use(cors({
 }));
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
-app.use("/uploads", express.static("uploads"));
+app.use("/uploads", (req, res, next) => {
+  // Force PDF content type for resumes to ensure in-browser previewing for all files (including legacy .0 files)
+  if (req.path.includes("/resumes/")) {
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "inline");
+  }
+  next();
+}, express.static("uploads"));
 
 // System Health Check Protocol
 app.get("/health", (req: Request, res: Response) => {
@@ -43,8 +54,8 @@ app.get("/health", (req: Request, res: Response) => {
 app.use("/api/jobs", jobRoutes);
 app.use("/api/applicants", applicantRoutes);
 app.use("/api/screening", screeningRoutes);
-app.use("/api/auth", authRoutes);
 app.use("/api/stats", statsRoutes);
+app.use("/api/auth", authRoutes);
 app.use("/api/chat", chatRoutes);
 
 // Global Error Handling Protocol

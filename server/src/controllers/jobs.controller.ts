@@ -33,9 +33,16 @@ class JobsController {
       });
     } catch (error: any) {
       console.error("Job Creation Fault:", error);
+      const isDuplicate = error.message?.includes("ALREADY_EXISTS");
+      
       return res
-        .status(500)
-        .json({ status: "fault", message: "Failed to create job." });
+        .status(isDuplicate ? 400 : 500)
+        .json({ 
+          status: "fault", 
+          message: isDuplicate 
+            ? error.message.replace("ALREADY_EXISTS: ", "") 
+            : "Failed to create technical requirement registry entry." 
+        });
     }
   }
 
@@ -56,11 +63,15 @@ class JobsController {
       });
     } catch (error: any) {
       console.error("Job Update Fault:", error);
+      const isDuplicate = error.message?.includes("ALREADY_EXISTS");
+
       return res
-        .status(500)
+        .status(isDuplicate ? 400 : 500)
         .json({
           status: "fault",
-          message: "Failed to update technical requirement.",
+          message: isDuplicate 
+            ? error.message.replace("ALREADY_EXISTS: ", "") 
+            : "Failed to update technical requirement.",
         });
     }
   }

@@ -14,7 +14,7 @@ import {
   EyeOff,
   Cloud
 } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import api from "@/lib/api";
 import { motion } from "framer-motion";
 import AuditLogModal from "@/components/settings/AuditLogModal";
@@ -103,8 +103,8 @@ export default function SettingsPage() {
   if (isLoading) {
     return (
       <div className="h-[60vh] flex flex-col items-center justify-center space-y-4">
-        <RefreshCcw className="size-10 text-aurora-blue animate-spin" />
-        <p className="text-xs font-bold text-aurora-muted tracking-widest">Loading account configuration...</p>
+        <RefreshCcw className="size-10 text-scrutiq-blue animate-spin" />
+        <p className="text-xs font-bold text-scrutiq-muted tracking-widest">Loading account configuration...</p>
       </div>
     );
   }
@@ -112,25 +112,25 @@ export default function SettingsPage() {
   return (
     <div className="space-y-10 animate-in fade-in duration-700 pb-20">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between bg-aurora-surface p-8 rounded-2xl border border-aurora-border shadow-sm gap-6">
+      <div className="flex flex-col md:flex-row md:items-center justify-between bg-scrutiq-surface p-4 sm:p-6 md:p-8 rounded-2xl border border-scrutiq-border shadow-sm gap-6">
         <div className="space-y-2">
-          <h1 className="text-4xl font-black text-aurora-dark tracking-tighter">Settings</h1>
-          <p className="text-sm font-bold text-aurora-muted tracking-wide max-w-lg">
+          <h1 className="text-3xl md:text-4xl font-black text-scrutiq-dark tracking-tighter">Settings</h1>
+          <p className="text-xs sm:text-sm font-bold text-scrutiq-muted tracking-wide max-w-lg">
             Manage your profile, notification preferences, and account settings.
           </p>
         </div>
         <div className="flex items-center gap-3">
            <button 
              onClick={() => window.location.reload()}
-             className="p-4 rounded-xl border border-aurora-border bg-white transition-all hover:bg-aurora-bg"
+             className="p-4 rounded-xl border border-scrutiq-border bg-white transition-all hover:bg-scrutiq-bg"
            >
-             <RefreshCcw className="size-5 text-aurora-muted" />
+             <RefreshCcw className="size-5 text-scrutiq-muted" />
            </button>
            <button 
              form="profile-form"
              type="submit"
              disabled={isSaving}
-             className="btn-primary flex items-center gap-2 px-8 shadow-xl shadow-aurora-blue/20"
+             className="btn-primary flex items-center gap-2 px-8 shadow-xl shadow-scrutiq-blue/20"
            >
              {isSaving ? <RefreshCcw className="size-4 animate-spin" /> : <Save className="size-4" />}
              <span>{isSaving ? "Saving..." : "Save preferences"}</span>
@@ -141,22 +141,22 @@ export default function SettingsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         {/* Profile Section */}
         <div className="lg:col-span-2 space-y-8">
-           <section className="admin-card p-10 bg-aurora-surface space-y-8">
-              <div className="flex items-center gap-4 border-b border-aurora-border/50 pb-6">
-                 <div className="size-16 rounded-3xl bg-aurora-blue flex items-center justify-center text-white text-3xl font-black shadow-xl shadow-aurora-blue/20">
+           <section className="admin-card p-6 sm:p-10 bg-scrutiq-surface space-y-8">
+              <div className="flex items-center gap-4 border-b border-scrutiq-border/50 pb-6">
+                 <div className="size-16 rounded-3xl bg-scrutiq-blue flex items-center justify-center text-white text-3xl font-black shadow-xl shadow-scrutiq-blue/20">
                    {profileData.fullName.charAt(0) || "U"}
                  </div>
                  <div>
-                    <h2 className="text-2xl font-black text-aurora-dark tracking-tight">Your profile</h2>
-                    <p className="text-xs font-bold text-aurora-muted tracking-widest leading-none mt-1">Update your name and company</p>
+                    <h2 className="text-2xl font-black text-scrutiq-dark tracking-tight">Your profile</h2>
+                    <p className="text-xs font-bold text-scrutiq-muted tracking-widest leading-none mt-1">Update your name and company</p>
                  </div>
               </div>
 
               <form id="profile-form" onSubmit={handleUpdateProfile} className="grid grid-cols-1 md:grid-cols-2 gap-8">
                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-aurora-muted tracking-widest uppercase ml-1">Full name</label>
+                    <label className="text-[10px] font-black text-scrutiq-muted tracking-widest uppercase ml-1">Full name</label>
                     <div className="relative group">
-                       <User className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-aurora-muted group-focus-within:text-aurora-blue transition-colors" />
+                       <User className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-scrutiq-muted group-focus-within:text-scrutiq-blue transition-colors" />
                        <input 
                          type="text" 
                          value={profileData.fullName}
@@ -169,22 +169,22 @@ export default function SettingsPage() {
                  </div>
 
                  <div className="space-y-2">
-                    <label className="text-[10px] font-black text-aurora-muted tracking-widest uppercase ml-1">Email address</label>
+                    <label className="text-[10px] font-black text-scrutiq-muted tracking-widest uppercase ml-1">Email address</label>
                     <div className="relative opacity-60">
-                       <Globe className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-aurora-muted" />
+                       <Globe className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-scrutiq-muted" />
                        <input 
                          type="email" 
                          value={user?.email || "loading..."}
                          disabled
-                         className="form-input pl-12 bg-aurora-bg cursor-not-allowed"
+                         className="form-input pl-12 bg-scrutiq-bg cursor-not-allowed"
                        />
                     </div>
                  </div>
 
                  <div className="space-y-2 md:col-span-2">
-                    <label className="text-[10px] font-black text-aurora-muted tracking-widest uppercase ml-1">Company name</label>
+                    <label className="text-[10px] font-black text-scrutiq-muted tracking-widest uppercase ml-1">Company name</label>
                     <div className="relative group">
-                       <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-aurora-muted group-focus-within:text-aurora-blue transition-colors" />
+                       <Building2 className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-scrutiq-muted group-focus-within:text-scrutiq-blue transition-colors" />
                        <input 
                          type="text" 
                          value={profileData.companyName}
@@ -198,14 +198,14 @@ export default function SettingsPage() {
               </form>
            </section>
 
-           <section className="admin-card p-10 bg-aurora-surface space-y-8 hover-lift">
-              <div className="flex items-center gap-4 border-b border-aurora-border/50 pb-6">
-                 <div className="size-12 rounded-2xl bg-aurora-bg border border-aurora-border flex items-center justify-center text-aurora-blue">
+           <section className="admin-card p-6 sm:p-10 bg-scrutiq-surface space-y-8 hover-lift">
+              <div className="flex items-center gap-4 border-b border-scrutiq-border/50 pb-6">
+                 <div className="size-12 rounded-2xl bg-scrutiq-bg border border-scrutiq-border flex items-center justify-center text-scrutiq-blue">
                    <Bell className="size-6" />
                  </div>
                  <div>
-                    <h2 className="text-xl font-black text-aurora-dark tracking-tight">Notifications</h2>
-                    <p className="text-[10px] font-bold text-aurora-muted tracking-widest uppercase mt-1">Choose what you get notified about</p>
+                    <h2 className="text-xl font-black text-scrutiq-dark tracking-tight">Notifications</h2>
+                    <p className="text-[10px] font-bold text-scrutiq-muted tracking-widest uppercase mt-1">Choose what you get notified about</p>
                  </div>
               </div>
 
@@ -214,12 +214,12 @@ export default function SettingsPage() {
                    { label: "New candidate alerts", desc: "Get notified when a new resume is uploaded." },
                    { label: "Screening completions", desc: "Get notified when a screening finishes." },
                  ].map((opt, i) => (
-                   <div key={i} className="flex items-center justify-between p-4 rounded-2xl hover:bg-aurora-bg transition-colors">
+                   <div key={i} className="flex items-center justify-between p-4 rounded-2xl hover:bg-scrutiq-bg transition-colors">
                       <div className="space-y-1">
-                         <p className="text-sm font-black text-aurora-dark tracking-tight">{opt.label}</p>
-                         <p className="text-[10px] font-bold text-aurora-muted tracking-widest">{opt.desc}</p>
+                         <p className="text-sm font-black text-scrutiq-dark tracking-tight">{opt.label}</p>
+                         <p className="text-[10px] font-bold text-scrutiq-muted tracking-widest">{opt.desc}</p>
                       </div>
-                      <div className="w-12 h-6 bg-aurora-blue rounded-full relative">
+                      <div className="w-12 h-6 bg-scrutiq-blue rounded-full relative">
                          <div className="absolute top-1 right-1 size-4 bg-white rounded-full shadow-sm" />
                        </div>
                    </div>
@@ -233,15 +233,15 @@ export default function SettingsPage() {
               <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6 pb-6 border-b border-rose-100/50">
                 <div className="space-y-1">
                   <h2 className="text-xl font-black text-rose-600 tracking-tight">Danger Zone</h2>
-                  <p className="text-[10px] font-bold text-aurora-muted tracking-widest uppercase">
+                  <p className="text-[10px] font-bold text-scrutiq-muted tracking-widest uppercase">
                     Irreversible administrative actions
                   </p>
                 </div>
               </div>
               <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                  <h3 className="text-sm font-black text-aurora-dark tracking-tight">Delete account</h3>
-                  <p className="text-[10px] font-bold text-aurora-muted tracking-widest leading-relaxed max-w-sm mt-1">
+                  <h3 className="text-sm font-black text-scrutiq-dark tracking-tight">Delete account</h3>
+                  <p className="text-[10px] font-bold text-scrutiq-muted tracking-widest leading-relaxed max-w-sm mt-1">
                     Once you delete your account, there is no going back. All candidates, jobs, and screening results will be permanently deleted.
                   </p>
                 </div>
@@ -271,19 +271,19 @@ export default function SettingsPage() {
 
         {/* Sidebar Settings */}
         <div className="space-y-8">
-           <div className="admin-card p-8 bg-aurora-blue/5 border-aurora-blue/20 flex flex-col items-center text-center space-y-6">
-              <div className="size-20 rounded-3xl bg-white flex items-center justify-center shadow-lg shadow-aurora-blue/5 border border-aurora-border">
-                 <ShieldCheck className="size-10 text-aurora-blue" />
+           <div className="admin-card p-8 bg-scrutiq-blue/5 border-scrutiq-blue/20 flex flex-col items-center text-center space-y-6">
+              <div className="size-20 rounded-3xl bg-white flex items-center justify-center shadow-lg shadow-scrutiq-blue/5 border border-scrutiq-border">
+                 <ShieldCheck className="size-10 text-scrutiq-blue" />
               </div>
               <div className="space-y-2">
-                 <h3 className="text-lg font-black text-aurora-dark tracking-tight">Secure session</h3>
-                 <p className="text-[10px] font-bold text-aurora-muted tracking-widest leading-relaxed">
+                 <h3 className="text-lg font-black text-scrutiq-dark tracking-tight">Secure session</h3>
+                 <p className="text-[10px] font-bold text-scrutiq-muted tracking-widest leading-relaxed">
                    Your session is secure and encrypted.
                  </p>
               </div>
               <button 
                 onClick={() => setIsAuditModalOpen(true)}
-                className="text-[10px] font-black text-aurora-blue tracking-widest uppercase hover:underline"
+                className="text-[10px] font-black text-scrutiq-blue tracking-widest uppercase hover:underline"
               >
                 View audit logs
               </button>
@@ -291,35 +291,35 @@ export default function SettingsPage() {
 
            <div className="admin-card p-8 bg-white space-y-6">
               <div className="flex items-center gap-3">
-                 <Cloud className="size-4 text-aurora-blue" />
-                 <span className="text-xs font-black text-aurora-dark tracking-widest uppercase">System status</span>
+                 <Cloud className="size-4 text-scrutiq-blue" />
+                 <span className="text-xs font-black text-scrutiq-dark tracking-widest uppercase">System status</span>
               </div>
               <div className="space-y-4">
                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-aurora-muted tracking-widest">Environment</span>
+                    <span className="text-[10px] font-bold text-scrutiq-muted tracking-widest">Environment</span>
                     <span className="text-[10px] font-black text-emerald-600 uppercase">Production</span>
                  </div>
                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-aurora-muted tracking-widest">Ai model</span>
-                    <span className="text-[10px] font-black text-aurora-blue uppercase">Gemini 1.5 Pro</span>
+                    <span className="text-[10px] font-bold text-scrutiq-muted tracking-widest">Ai model</span>
+                    <span className="text-[10px] font-black text-scrutiq-blue uppercase">Gemini 1.5 Pro</span>
                  </div>
                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-aurora-muted tracking-widest">Region</span>
-                    <span className="text-[10px] font-black text-aurora-dark uppercase">East Africa</span>
+                    <span className="text-[10px] font-bold text-scrutiq-muted tracking-widest">Region</span>
+                    <span className="text-[10px] font-black text-scrutiq-dark uppercase">East Africa</span>
                  </div>
               </div>
            </div>
 
-           <div className="admin-card p-8 bg-aurora-dark text-white space-y-6">
+           <div className="admin-card p-8 bg-scrutiq-dark text-white space-y-6">
               <div className="space-y-2">
                  <h3 className="text-base font-black tracking-tight">Activity trail</h3>
-                 <p className="text-[10px] font-bold text-aurora-muted/80 tracking-widest leading-relaxed">
+                 <p className="text-[10px] font-bold text-scrutiq-muted/80 tracking-widest leading-relaxed">
                    See all actions taken on your account.
                  </p>
               </div>
               <button 
                 onClick={() => setIsAuditModalOpen(true)}
-                className="btn-primary w-full bg-white text-aurora-dark border-white hover:bg-aurora-bg h-10 px-0"
+                className="btn-primary w-full bg-white text-scrutiq-dark border-white hover:bg-scrutiq-bg h-10 px-0"
               >
                 View Logs
               </button>

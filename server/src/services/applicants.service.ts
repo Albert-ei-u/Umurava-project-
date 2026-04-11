@@ -3,6 +3,13 @@ import pdf from "pdf-parse";
 import Applicant from "../models/Applicant.model";
 import Screening from "../models/Screening.model";
 
+let extractionQueue = Promise.resolve();
+const queueExtraction = <T>(task: () => Promise<T>): Promise<T> => {
+  const result = extractionQueue.then(task);
+  extractionQueue = result.catch(() => {}) as unknown as Promise<void>;
+  return result;
+};
+
 class ApplicantsService {
   /**
    * Candidate Registry Retrieval:
@@ -64,24 +71,52 @@ class ApplicantsService {
     providedEmails?: string | string[],
   ) {
     const emails = Array.isArray(providedEmails) ? providedEmails : [providedEmails].filter(Boolean);
+    
+    console.log(`[INGESTION] Multi-file request: ${files.length} dossiers received.`);
 
-    // Process all files in parallel with error isolation
+    // --- PHASE 1: SEQUENTIAL EXTRACTION & PERSISTENCE ---
+    const preparedData = [];
+    for (let i = 0; i < files.length; i++) {
+        try {
+            const data = await this.prepareFileData(files[i], ownerId, emails[i]);
+            if (data) preparedData.push(data);
+        } catch (err) {
+            console.error(`[INGESTION ERROR] Phase 1 failed for ${files[i].originalname}:`, err);
+        }
+    }
+
+    if (preparedData.length === 0) return [];
+
+    // --- PHASE 2: PARALLEL AI ENRICHMENT ---
+    console.log(`[INGESTION] Phase 1 complete. Proceeding with Phase 2 for ${preparedData.length} records.`);
+    
     const results = await Promise.all(
-      files.map((file, i) => this.processFile(file, ownerId, emails[i]))
+        preparedData.map(async (data) => {
+            try {
+                return await this.processTextViaAI(data.text, data.ownerId, data.source, data.email, data.resumeUrl);
+            } catch (err) {
+                console.error(`[INGESTION ERROR] Phase 2 AI failure for ${data.source}:`, err);
+                return null;
+            }
+        })
     );
 
-    return results.filter(Boolean);
+    const successfulResults = results.filter(Boolean);
+    console.log(`[INGESTION SUCCESS] Ingested ${successfulResults.length} of ${files.length} requested files.`);
+    
+    return successfulResults;
   }
 
   async ingestFromUrls(urls: string[], ownerId: string) {
     const axios = (await import("axios")).default;
+    const preparedData = [];
 
-    const results = await Promise.all(urls.map(async (url) => {
+    // --- PHASE 1: SEQUENTIAL URL FETCH & EXTRACTION ---
+    for (const url of urls) {
       try {
         let targetUrl = url;
         let fileName = "external_doc";
 
-        // Advanced Google Document Identification
         const docMatch = url.match(/\/d\/([\w_-]+)/);
         const docId = docMatch ? docMatch[1] : null;
 
@@ -93,21 +128,42 @@ class ApplicantsService {
           fileName = `Drive-${docId}.pdf`;
         } else {
           fileName = url.split("/").pop()?.split(/[?#]/)[0] || "external_doc";
+          const allowedExts = ["pdf", "docx", "doc", "csv", "xlsx", "txt"];
+          const urlExt = fileName.split(".").pop()?.toLowerCase();
+          
+          if (!urlExt || !allowedExts.includes(urlExt)) {
+            console.warn(`[SECURITY] URL Refusal: Insecure extension '${urlExt}' for ${url}`);
+            continue;
+          }
         }
 
         const response = await axios.get(targetUrl, { 
           responseType: "arraybuffer", 
           maxRedirects: 5,
-          timeout: 25000,
-          headers: { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36' }
+          timeout: 20000,
+          maxContentLength: 15 * 1024 * 1024,
+          headers: { 
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
+          }
         });
 
         const contentType = (response.headers["content-type"] || "").toLowerCase();
-        
-        // Detection of "Private/Login Required" redirects for Google Docs
-        if (contentType.includes("text/html") && url.includes("google.com")) {
-          console.warn(`[ACCESS DENIED] Document ${url} is private or requires authentication.`);
-          return null;
+        const allowedMimeTypes = [
+          "application/pdf",
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+          "application/msword",
+          "text/csv",
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+          "text/plain"
+        ];
+
+        // Security Lockdown: Refuse HTML or executable content from URLs
+        const isSafeMime = allowedMimeTypes.some(m => contentType.includes(m));
+        const isGoogleProxy = url.includes("google.com"); 
+
+        if (!isSafeMime && !isGoogleProxy) {
+          console.error(`[SECURITY] URL Refusal: Untrusted content-type '${contentType}' for ${url}`);
+          continue;
         }
 
         const file = {
@@ -116,55 +172,89 @@ class ApplicantsService {
           mimetype: contentType,
         } as Express.Multer.File;
 
-        // Web Extraction flow for generic sites
-        if (contentType.includes("text/html")) {
-          return this.processTextViaAI(file.buffer.toString(), ownerId, url);
+        if (contentType.includes("text/html") && !isGoogleProxy) {
+          console.warn(`[SECURITY] Blocking HTML ingestion from unverified source: ${url}`);
+          continue;
         }
 
-        return this.processFile(file, ownerId);
+
+        const res = await this.prepareFileData(file, ownerId);
+        if (res) preparedData.push(res);
       } catch (error: any) {
-        console.error(`[INGESTION FAULT] Link ${url}:`, error.message);
-        return null;
+        console.error(`[URL INGESTION FAULT] ${url}:`, error.message);
       }
-    }));
+    }
+
+    // --- PHASE 2: PARALLEL AI ENRICHMENT ---
+    const results = await Promise.all(
+        preparedData.map(async (data) => {
+            try {
+                return await this.processTextViaAI(data.text, data.ownerId, data.source, data.email, data.resumeUrl);
+            } catch (err) {
+                return null;
+            }
+        })
+    );
 
     return results.filter(Boolean);
   }
 
-  private async processFile(file: Express.Multer.File, ownerId: string, email?: string) {
-    const fs = (await import("fs")).default;
-    const path = (await import("path")).default;
+  private async prepareFileData(file: Express.Multer.File, ownerId: string, email?: string) {
+    const fs = await import("fs/promises");
+    const path = await import("path");
+    const crypto = await import("crypto");
     
-    const ext = file.originalname.split(".").pop()?.toLowerCase() || "pdf";
-    const mime = file.mimetype.toLowerCase();
-    let text = "";
+    const originalName = file.originalname || "";
+    const mime = (file.mimetype || "").toLowerCase();
+    let ext = originalName.includes(".") ? originalName.split(".").pop()?.toLowerCase() : "";
+    
+    const allowedExts = ["pdf", "docx", "doc", "csv", "xlsx", "txt"];
+    
+    // Explicitly force .pdf extension for PDF mime types or generic streams
+    if (mime.includes("pdf") || ext === "0" || !ext) {
+      ext = "pdf";
+    }
 
+    if (!allowedExts.includes(ext || "")) {
+      console.warn(`[SECURITY] File Ingestion Refusal: Illegal extension Type '${ext}'`);
+      return null;
+    }
+
+    // Create unique storage path
+    const uploadDir = path.join(process.cwd(), "uploads", "resumes");
+    try { await fs.mkdir(uploadDir, { recursive: true }); } catch(e) {}
+
+    const uniqueId = Date.now() + '-' + Math.random().toString(36).substring(2, 8);
+    const fileName = `CV-${uniqueId}.${ext}`;
+    const filePath = path.join(uploadDir, fileName);
+    
+    // Deep clone buffer to eliminate shared memory risks in pdf-parse
+    const bufferClone = Buffer.from(file.buffer);
+    await fs.writeFile(filePath, bufferClone);
+
+    let text = "";
     try {
-      // 1. Text Extraction
       if (ext === "pdf" || mime.includes("pdf")) {
-        const data = await pdf(file.buffer);
+        const data = await pdf(bufferClone);
         text = data.text;
       } else if (ext === "docx" || ext === "doc" || mime.includes("word") || mime.includes("officedocument")) {
-        // @ts-ignore
         const mammoth = await import("mammoth");
-        const result = await mammoth.extractRawText({ buffer: file.buffer });
+        const result = await mammoth.extractRawText({ buffer: bufferClone });
         text = result.value;
       }
 
-      if (!text || text.trim().length < 50) return null;
+      if (!text || text.trim().length < 50) {
+          console.warn(`[INGESTION REFUSAL] ${file.originalname}: Insufficient text extracted.`);
+          return null;
+      }
 
-      // 2. Document Persistence (Save to Registry Storage)
-      const uploadDir = path.join(process.cwd(), "uploads", "resumes");
-      if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-
-      const fileName = `CV-${Date.now()}-${Math.random().toString(36).substring(7)}.${ext}`;
-      const filePath = path.join(uploadDir, fileName);
-      fs.writeFileSync(filePath, file.buffer);
-
-      const resumeUrl = `uploads/resumes/${fileName}`;
-
-      // 3. Metadata Extraction & Finalization
-      return this.processTextViaAI(text, ownerId, file.originalname, email, resumeUrl);
+      return {
+        text,
+        ownerId,
+        source: file.originalname,
+        email,
+        resumeUrl: `resumes/${fileName}`
+      };
     } catch (error: any) {
       console.error(`[EXTRACTION ERROR] ${file.originalname}:`, error.message);
       return null;
@@ -173,17 +263,22 @@ class ApplicantsService {
 
   private async processTextViaAI(rawText: string, ownerId: string, source: string, fallbackEmail?: string, resumeUrl?: string) {
     const geminiService = (await import("./gemini.service")).default;
+    const crypto = await import("crypto");
     
     const prompt = `
       Perform a deep extraction of candidate metadata from the following document.
+      SESSION_ID: ${crypto.randomUUID()}
       SOURCE_REF: ${source}
       DOCUMENT_CONTENT: ${rawText.substring(0, 10000)}
       
       RESPOND ONLY WITH VALID JSON:
       {
         "name": "Full Name",
-        "email": "Primary Email Address",
+        "email": "Primary Email Address (EXTREMELY IMPORTANT: Search with all your might for links/icons, but NEVER guess. Return 'No email available' if not found.)",
+        "gender": "Extract GENDER as 'M', 'F', or 'Not stated'. Search for pronouns/mentions, but NEVER guess based on names. If unsure, return 'Not stated'.",
         "role": "Most relevant title or current role",
+
+
         "location": "Current City/Country",
         "experience": "High-level summary of professional tenure",
         "technicalProfile": "Dense summary of technical stack and expertise"
@@ -191,27 +286,84 @@ class ApplicantsService {
     `;
 
     try {
-      const result = await geminiService.executeWithRetry(prompt);
-      const output = (await result.response).text();
+      const aiPromise = geminiService.executeWithRetry(prompt);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("AI_TIMEOUT")), 90000)
+      );
+
+      const result = await Promise.race([aiPromise, timeoutPromise]) as any;
+      const response = await result.response;
+      const output = response.text();
       
       const jsonMatch = output.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error("AI response did not contain valid metadata.");
       
       const data = JSON.parse(jsonMatch[0]);
 
-      const applicant = new Applicant({
-        name: data.name || source.replace(/\.[^/.]+$/, ""),
-        email: data.email || fallbackEmail || `${source.toLowerCase().replace(/[^a-z]/g, ".")}@registry.extern`,
-        role: data.role || "Technical Professional",
-        location: data.location || "Remote / Global",
-        experience: data.experience || "Verified Profile",
-        technicalProfile: data.technicalProfile || rawText.substring(0, 3000),
-        resuméText: rawText,
-        resumeUrl,
-        ownerId,
-      });
+      // --- ATOMIC PERSISTENCE QUEUE ---
+      // We use a sequential queue for the duplicate check and save operation to prevent race conditions
+      // during parallel ingestion (e.g., when multiple files for the same person are uploaded).
+      return await queueExtraction(async () => {
+          // Re-verify in DB now that we are in the sequential queue
+          const email = (data.email || "").toLowerCase().trim();
+          let isDuplicate = false;
+          let originalId = null;
+          let similarity = 0;
 
-      return await applicant.save();
+          if (email) {
+            const emailMatch = await Applicant.findOne({ ownerId, email });
+            if (emailMatch) {
+                isDuplicate = true;
+                originalId = emailMatch._id;
+                similarity = 100;
+            }
+          }
+
+          // Semantic Fallback if no email match
+          if (!isDuplicate && data.name) {
+            const potentialMatches = await Applicant.find({
+              ownerId,
+              name: { $regex: new RegExp(`^${data.name.trim()}$`, 'i') }
+            }).limit(3);
+
+            if (potentialMatches.length > 0) {
+              const comparisonPrompt = `
+                Task: Compare two candidate resume summaries and determine if they represent the same person.
+                Candidate A (New): ${data.technicalProfile}
+                Candidate B (Existing): ${potentialMatches[0].technicalProfile}
+                Respond only with JSON: { "isSamePerson": boolean, "similarity": number }
+              `;
+              try {
+                const compResult = await geminiService.executeWithRetry(comparisonPrompt);
+                const compText = (await compResult.response).text();
+                const compData = JSON.parse(compText.match(/\{[\s\S]*\}/)?.[0] || '{"isSamePerson": false}');
+                if (compData.isSamePerson && compData.similarity > 85) {
+                  isDuplicate = true;
+                  originalId = potentialMatches[0]._id;
+                  similarity = compData.similarity;
+                }
+              } catch (e) {}
+            }
+          }
+
+          const applicant = new Applicant({
+            name: data.name || source.replace(/\.[^/.]+$/, ""),
+            email: email || fallbackEmail || `external-${crypto.randomUUID().substring(0, 8)}@registry.extern`,
+            role: data.role || "Technical Professional",
+            location: data.location || "Remote / Global",
+            experience: data.experience || "Verified Profile",
+            technicalProfile: data.technicalProfile || rawText.substring(0, 3000),
+            resumeText: rawText,
+            resumeUrl,
+            ownerId,
+            isDuplicate,
+            originalCandidateId: originalId,
+            similarityScore: similarity,
+            profileStatus: isDuplicate ? "Duplicate" : "Pending"
+          });
+
+          return await applicant.save();
+      });
     } catch (e) {
       console.error("[AI DATA EXTRACTION FAULT]:", e);
       return null;
@@ -219,7 +371,53 @@ class ApplicantsService {
   }
 
   async deleteApplicant(id: string) {
-    return await Applicant.findByIdAndDelete(id);
+    const result = await Applicant.findByIdAndDelete(id);
+    
+    // --- REACTIVE AUDIT ---
+    // If we just deleted a primary record, any profiles pointing to it as a duplicate
+    // must be promoted to prevent infinite "Duplicate" stagnation.
+    await Applicant.updateMany(
+      { originalCandidateId: id },
+      { 
+        $set: { 
+          isDuplicate: false, 
+          profileStatus: "Verified",
+          similarityScore: 0
+        },
+        $unset: { originalCandidateId: "" }
+      }
+    );
+    
+    return result;
+  }
+
+  /**
+   * Duplicate Resolution Protocol:
+   * Discards one of the conflicting profiles after administrative confirmation.
+   */
+  async resolveDuplicate(id: string, action: "keep_original" | "keep_new") {
+    const duplicateProfile = await Applicant.findById(id);
+    if (!duplicateProfile) throw new Error("Technical Registry Fault: Duplicate profile not found.");
+
+    if (action === "keep_original") {
+      // Preference: Discard the new duplicate and retain the primary record
+      console.log(`[DUPLICATE RESOLUTION] Discarding new duplicate: ${id}`);
+      return await Applicant.findByIdAndDelete(id);
+    } else {
+      // Preference: Replace the legacy record with the new ingestion
+      const originalId = duplicateProfile.originalCandidateId;
+      console.log(`[DUPLICATE RESOLUTION] Replacing legacy profile ${originalId} with new profile ${id}`);
+      
+      if (originalId) {
+        await Applicant.findByIdAndDelete(originalId);
+      }
+
+      // Finalize the new profile as the primary entry
+      duplicateProfile.isDuplicate = false;
+      duplicateProfile.originalCandidateId = undefined;
+      duplicateProfile.profileStatus = "Verified";
+      return await duplicateProfile.save();
+    }
   }
 }
 

@@ -15,7 +15,7 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import api from "@/lib/api";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { motion, AnimatePresence } from "framer-motion";
 import { useDispatch } from "react-redux";
 import { addJob } from "@/store/slices/jobsSlice";
@@ -126,24 +126,24 @@ const CreateJobModal = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="absolute inset-0 bg-aurora-dark/30 backdrop-blur-sm"
+            className="absolute inset-0 bg-scrutiq-dark/30 backdrop-blur-sm"
           />
           <motion.div
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative w-full max-w-2xl bg-aurora-surface rounded-3xl border border-aurora-border shadow-2xl overflow-hidden"
+            className="relative w-full max-w-2xl bg-scrutiq-surface rounded-3xl border border-scrutiq-border shadow-2xl overflow-hidden"
           >
-            <div className="p-8 border-b border-aurora-border/50 flex items-start justify-between bg-aurora-bg/30">
+            <div className="p-8 border-b border-scrutiq-border/50 flex items-start justify-between bg-scrutiq-bg/30">
               <div className="flex items-center gap-4">
-                <div className="size-12 rounded-xl bg-aurora-blue flex items-center justify-center shadow-lg shadow-aurora-blue/20">
+                <div className="size-12 rounded-xl bg-scrutiq-blue flex items-center justify-center shadow-lg shadow-scrutiq-blue/20">
                   <Plus className="size-6 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-xl font-black text-aurora-dark uppercase tracking-tight">
+                  <h2 className="text-xl font-black text-scrutiq-dark uppercase tracking-tight">
                     {jobToEdit ? "Edit Job Requirement" : "Create New Job"}
                   </h2>
-                  <p className="text-[10px] font-bold text-aurora-muted uppercase tracking-widest leading-none mt-1">
+                  <p className="text-[10px] font-bold text-scrutiq-muted uppercase tracking-widest leading-none mt-1">
                     {jobToEdit
                       ? "Update technical criteria"
                       : "Post a new opening"}
@@ -152,7 +152,7 @@ const CreateJobModal = ({
               </div>
               <button
                 onClick={onClose}
-                className="p-2 text-aurora-muted hover:text-aurora-blue hover:bg-white rounded-xl border border-transparent hover:border-aurora-border transition-all"
+                className="p-2 text-scrutiq-muted hover:text-scrutiq-blue hover:bg-white rounded-xl border border-transparent hover:border-scrutiq-border transition-all"
               >
                 <X className="size-5" />
               </button>
@@ -161,7 +161,7 @@ const CreateJobModal = ({
             <form onSubmit={handleSubmit(onSubmit)} className="p-8 space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-aurora-muted uppercase tracking-widest flex items-center gap-2">
+                  <label className="text-[10px] font-black text-scrutiq-muted uppercase tracking-widest flex items-center gap-2">
                     <Briefcase className="size-3" /> Job Title
                   </label>
                   <input
@@ -177,7 +177,7 @@ const CreateJobModal = ({
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-[10px] font-black text-aurora-muted uppercase tracking-widest flex items-center gap-2">
+                  <label className="text-[10px] font-black text-scrutiq-muted uppercase tracking-widest flex items-center gap-2">
                     <Globe className="size-3" /> Department
                   </label>
                   <input
@@ -194,7 +194,7 @@ const CreateJobModal = ({
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-aurora-muted uppercase tracking-widest flex items-center gap-2">
+                <label className="text-[10px] font-black text-scrutiq-muted uppercase tracking-widest flex items-center gap-2">
                   <MapPin className="size-3" /> Technical Location
                 </label>
                 <input
@@ -210,7 +210,7 @@ const CreateJobModal = ({
               </div>
 
               <div className="space-y-2">
-                <label className="text-[10px] font-black text-aurora-muted uppercase tracking-widest flex items-center gap-2">
+                <label className="text-[10px] font-black text-scrutiq-muted uppercase tracking-widest flex items-center gap-2">
                   <AlignLeft className="size-3" /> Job Description
                 </label>
                 <textarea
@@ -226,7 +226,7 @@ const CreateJobModal = ({
                 )}
               </div>
 
-              <div className="pt-6 border-t border-aurora-border/50 flex justify-end gap-4">
+              <div className="pt-6 border-t border-scrutiq-border/50 flex justify-end gap-4">
                 <button
                   type="button"
                   onClick={onClose}
@@ -237,7 +237,7 @@ const CreateJobModal = ({
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="btn-primary flex items-center gap-2 shadow-lg shadow-aurora-blue/20"
+                  className="btn-primary flex items-center gap-2 shadow-lg shadow-scrutiq-blue/20"
                 >
                   <ShieldCheck className="size-4" />
                   <span>

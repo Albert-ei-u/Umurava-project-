@@ -7,10 +7,15 @@ export interface IApplicant extends Document {
   location: string;
   experience: string;
   email: string;
+  gender: "M" | "F" | "Not stated";
   technicalProfile: string;
-  resuméText?: string;
+
+  resumeText?: string;
   resumeUrl?: string;
-  profileStatus: "Verified" | "Pending" | "Archived";
+  profileStatus: "Verified" | "Pending" | "Archived" | "Duplicate";
+  isDuplicate: boolean;
+  originalCandidateId?: string;
+  similarityScore?: number;
   ownerId: string;
   createdAt: Date;
   updatedAt: Date;
@@ -24,10 +29,15 @@ const ApplicantSchema: Schema = new Schema(
     location: { type: String, required: true },
     experience: { type: String, required: true },
     email: { type: String, required: true },
+    gender: { type: String, enum: ["M", "F", "Not stated"], default: "Not stated" },
     technicalProfile: { type: String, required: true },
-    resuméText: { type: String },
+
+    resumeText: { type: String },
     resumeUrl: { type: String },
-    profileStatus: { type: String, enum: ["Verified", "Pending", "Archived"], default: "Pending" },
+    profileStatus: { type: String, enum: ["Verified", "Pending", "Archived", "Duplicate"], default: "Pending" },
+    isDuplicate: { type: Boolean, default: false },
+    originalCandidateId: { type: Schema.Types.ObjectId, ref: "Applicant" },
+    similarityScore: { type: Number, default: 0 },
     ownerId: { type: String, required: true },
   },
   { timestamps: true }

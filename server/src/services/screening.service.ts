@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import Screening from "../models/Screening.model";
+import Applicant from "../models/Applicant.model";
 import geminiService from "./gemini.service";
+
 import jobsService from "./jobs.service";
 import applicantsService from "./applicants.service";
 
@@ -14,21 +16,26 @@ class ScreeningService {
     const enriched = await Promise.all(
       rankings.map(async (rank: any) => {
         // Improved lookup: Check both _id and legacy id field
-        const applicant = (await mongoose
-          .model("Applicant")
-          .findOne({
-            $or: [
-              mongoose.isValidObjectId(rank.candidateId) ? { _id: rank.candidateId } : { _id: null },
-              { id: rank.candidateId }
-            ].filter(query => Object.values(query)[0] !== null)
-          })
-          .lean()) as any;
+        const query: any = {};
+        if (mongoose.isValidObjectId(rank.candidateId)) {
+          query._id = rank.candidateId;
+        } else {
+          query.$or = [{ id: rank.candidateId }, { email: rank.candidateEmail }];
+        }
+
+        const applicant = (await Applicant.findOne(query).lean()) as any;
         return {
           ...rank,
+          id: rank.candidateId, // Surface for frontend lookup
           candidateName:
             applicant?.name || rank.candidateName || "Technical Candidate",
           candidateEmail: applicant?.email || "No email available",
-          candidateResume: applicant?.resume || null,
+          candidateGender: applicant?.gender || rank.candidateGender || "Not stated",
+          candidateExperience: applicant?.experience || "No experience provided",
+          candidateResume: applicant?.resumeUrl || null,
+
+          resumeText: applicant?.resumeText || null,
+          isDuplicate: applicant?.isDuplicate || false,
         };
       }),
     );
@@ -48,6 +55,9 @@ class ScreeningService {
     // 1. Requirement Matrix Retrieval
     const job = await jobsService.getJobById(jobId);
     if (!job) throw new Error("Job Requirement Registry Fault: Job not found.");
+    if (job.status === "Archived") {
+      throw new Error("Job Requirement Registry Fault: Cannot perform screening against an archived job.");
+    }
 
     // 2. Candidate Registry Retrieval
     // We need to get ONLY applicants for this owner to ensure isolation
@@ -82,6 +92,7 @@ class ScreeningService {
         await mongoose.model("Applicant").findByIdAndUpdate(candidateId, {
           name: result.candidateName,
           email: result.candidateEmail,
+          gender: result.candidateGender || "Not stated",
           experience: result.microSummary,
         });
       }
@@ -99,7 +110,21 @@ class ScreeningService {
       savedResults.push(screeningResult);
     }
 
-    return savedResults;
+    // 5. Enrichment Protocol for Frontend Delivery
+    const enrichedResults = await Promise.all(
+      savedResults.map(async (res: any) => {
+        const applicant = await Applicant.findById(res.candidateId).lean() as any;
+        return {
+          ...res.toObject(),
+          candidateGender: applicant?.gender || res.candidateGender || "Not stated",
+          candidateExperience: applicant?.experience || "No experience provided",
+          candidateResume: applicant?.resumeUrl || null,
+
+        };
+      })
+    );
+
+    return enrichedResults;
   }
 
   async deleteScreening(id: string) {

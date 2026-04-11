@@ -8,7 +8,7 @@ import {
   faSearch,
   faFilter,
   faBriefcase,
-  faSync
+  faSync,
 } from "@fortawesome/free-solid-svg-icons";
 import JobCard from "@/components/jobs/JobCard";
 import CreateJobModal from "@/components/jobs/CreateJobModal";
@@ -16,7 +16,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/store";
 import { setJobs } from "@/store/slices/jobsSlice";
 import api from "@/lib/api";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 
 export default function JobsPage() {
   const dispatch = useDispatch();
@@ -58,8 +58,12 @@ export default function JobsPage() {
     <div className="space-y-8 pb-12">
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h1 className="text-3xl font-bold tracking-tight text-white">Job Listings</h1>
-          <p className="text-gray-400">Manage your active job openings and screening processes.</p>
+          <h1 className="text-3xl font-bold tracking-tight text-white">
+            Job Listings
+          </h1>
+          <p className="text-gray-400">
+            Manage your active job openings and screening processes.
+          </p>
         </div>
 
         <motion.button
@@ -98,17 +102,22 @@ export default function JobsPage() {
       {/* Jobs Grid */}
       {isLoading ? (
         <div className="py-24 flex flex-col items-center justify-center space-y-4">
-          <FontAwesomeIcon icon={faSync} className="text-brand-indigo text-4xl animate-spin" />
-          <p className="text-xs font-black text-gray-500 uppercase tracking-widest">Synchronizing Registry...</p>
+          <FontAwesomeIcon
+            icon={faSync}
+            className="text-brand-indigo text-4xl animate-spin"
+          />
+          <p className="text-xs font-black text-gray-500 uppercase tracking-widest">
+            Synchronizing Registry...
+          </p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <AnimatePresence mode="popLayout">
             {displayedJobs.map((job, index) => (
-              <JobCard 
-                key={job.id} 
-                job={job} 
-                index={index} 
+              <JobCard
+                key={job.id}
+                job={job}
+                index={index}
                 onRefresh={fetchJobs}
                 onEdit={handleEdit}
               />
@@ -125,10 +134,11 @@ export default function JobsPage() {
           <div>
             <h3 className="text-xl font-bold text-white">No jobs found</h3>
             <p className="text-gray-400 max-w-xs mx-auto">
-              Get started by creating your first job listing to begin screening candidates.
+              Get started by creating your first job listing to begin screening
+              candidates.
             </p>
           </div>
-          <button 
+          <button
             onClick={() => {
               setEditingJob(null);
               setIsModalOpen(true);
@@ -141,9 +151,9 @@ export default function JobsPage() {
       )}
 
       {/* Create/Edit Job Modal */}
-      <CreateJobModal 
-        isOpen={isModalOpen} 
-        onClose={handleCloseModal} 
+      <CreateJobModal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
         jobToEdit={editingJob}
       />
     </div>

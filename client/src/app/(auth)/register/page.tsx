@@ -17,7 +17,7 @@ import {
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { toast } from "sonner";
+import { toast } from "@/lib/toast";
 import { motion, AnimatePresence } from "framer-motion";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
@@ -84,8 +84,8 @@ const RegisterPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-aurora-bg flex flex-col items-center justify-center p-6 relative overflow-hidden text-aurora-muted">
-      <div className="absolute top-[-10%] right-[-10%] size-96 bg-aurora-blue/5 rounded-full blur-3xl opacity-50" />
+    <div className="min-h-screen bg-scrutiq-bg flex flex-col items-center justify-center p-6 relative overflow-hidden text-scrutiq-muted">
+      <div className="absolute top-[-10%] right-[-10%] size-96 bg-scrutiq-blue/5 rounded-full blur-3xl opacity-50" />
       <div className="absolute bottom-[-10%] left-[-10%] size-96 bg-purple-500/5 rounded-full blur-3xl opacity-50" />
 
       <motion.div 
@@ -94,14 +94,14 @@ const RegisterPage = () => {
         className="w-full max-w-lg space-y-8"
       >
         <div className="text-center space-y-4">
-          <div className="size-16 bg-aurora-blue rounded-2xl flex items-center justify-center shadow-xl shadow-aurora-blue/20 mx-auto">
+          <div className="size-16 bg-scrutiq-blue rounded-2xl flex items-center justify-center shadow-xl shadow-scrutiq-blue/20 mx-auto">
             <ShieldCheck className="size-10 text-white" />
           </div>
           <div>
-            <h1 className="text-4xl font-black text-aurora-dark tracking-tighter leading-none">
+            <h1 className="text-4xl font-black text-scrutiq-dark tracking-tighter leading-none">
               {step === "register" ? "Create account" : "Verify email"}
             </h1>
-            <p className="text-[10px] font-bold text-aurora-muted tracking-widest mt-2 px-10">
+            <p className="text-[10px] font-bold text-scrutiq-muted tracking-widest mt-2 px-10">
               {step === "register" 
                 ? "Join Scrutiq to start screening your technical talent" 
                 : `Enter the 6-digit activation code sent to ${formData.email}`}
@@ -109,7 +109,7 @@ const RegisterPage = () => {
           </div>
         </div>
 
-        <div className="admin-card p-10 bg-aurora-surface shadow-2xl">
+        <div className="admin-card p-10 bg-scrutiq-surface shadow-2xl">
           <AnimatePresence mode="wait">
             {step === "register" ? (
               <motion.form 
@@ -123,14 +123,14 @@ const RegisterPage = () => {
                 <div className="space-y-2">
                   <label className="text-[10px] font-black tracking-widest ml-1">Full name</label>
                   <div className="relative flex items-center group">
-                    <User className="size-4 absolute left-4 text-aurora-muted group-focus-within:text-aurora-blue transition-colors" />
+                    <User className="size-4 absolute left-4 text-scrutiq-muted group-focus-within:text-scrutiq-blue transition-colors" />
                     <input 
                       type="text"
                       required
                       placeholder="Full name ..."
                       value={formData.fullName}
                       onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
-                      className="w-full bg-aurora-bg border border-aurora-border rounded-xl pl-11 pr-4 py-3.5 text-xs font-bold text-aurora-dark outline-none focus:border-aurora-blue focus:ring-4 focus:ring-aurora-blue/5 transition-all tracking-wider"
+                      className="w-full bg-scrutiq-bg border border-scrutiq-border rounded-xl pl-11 pr-4 py-3.5 text-xs font-bold text-scrutiq-dark outline-none focus:border-scrutiq-blue focus:ring-4 focus:ring-scrutiq-blue/5 transition-all tracking-wider"
                     />
                   </div>
                 </div>
@@ -138,14 +138,14 @@ const RegisterPage = () => {
                 <div className="space-y-2">
                   <label className="text-[10px] font-black tracking-widest ml-1">Work email</label>
                   <div className="relative flex items-center group">
-                    <Mail className="size-4 absolute left-4 text-aurora-muted group-focus-within:text-aurora-blue transition-colors" />
+                    <Mail className="size-4 absolute left-4 text-scrutiq-muted group-focus-within:text-scrutiq-blue transition-colors" />
                     <input 
                       type="email"
                       required
                       placeholder="name@company.com"
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full bg-aurora-bg border border-aurora-border rounded-xl pl-11 pr-4 py-3.5 text-xs font-bold text-aurora-dark outline-none focus:border-aurora-blue focus:ring-4 focus:ring-aurora-blue/5 transition-all tracking-wider"
+                      className="w-full bg-scrutiq-bg border border-scrutiq-border rounded-xl pl-11 pr-4 py-3.5 text-xs font-bold text-scrutiq-dark outline-none focus:border-scrutiq-blue focus:ring-4 focus:ring-scrutiq-blue/5 transition-all tracking-wider"
                     />
                   </div>
                 </div>
@@ -153,14 +153,14 @@ const RegisterPage = () => {
                 <div className="space-y-2 md:col-span-2">
                   <label className="text-[10px] font-black tracking-widest ml-1">Company name</label>
                   <div className="relative flex items-center group">
-                    <Building2 className="size-4 absolute left-4 text-aurora-muted group-focus-within:text-aurora-blue transition-colors" />
+                    <Building2 className="size-4 absolute left-4 text-scrutiq-muted group-focus-within:text-scrutiq-blue transition-colors" />
                     <input 
                       type="text"
                       required
                       placeholder="Technical Solutions Ltd"
                       value={formData.companyName}
                       onChange={(e) => setFormData({ ...formData, companyName: e.target.value })}
-                      className="w-full bg-aurora-bg border border-aurora-border rounded-xl pl-11 pr-4 py-3.5 text-xs font-bold text-aurora-dark outline-none focus:border-aurora-blue focus:ring-4 focus:ring-aurora-blue/5 transition-all tracking-wider"
+                      className="w-full bg-scrutiq-bg border border-scrutiq-border rounded-xl pl-11 pr-4 py-3.5 text-xs font-bold text-scrutiq-dark outline-none focus:border-scrutiq-blue focus:ring-4 focus:ring-scrutiq-blue/5 transition-all tracking-wider"
                     />
                   </div>
                 </div>
@@ -168,19 +168,19 @@ const RegisterPage = () => {
                 <div className="space-y-2">
                   <label className="text-[10px] font-black tracking-widest ml-1">Password</label>
                   <div className="relative flex items-center group">
-                    <Lock className="size-4 absolute left-4 text-aurora-muted group-focus-within:text-aurora-blue transition-colors" />
+                    <Lock className="size-4 absolute left-4 text-scrutiq-muted group-focus-within:text-scrutiq-blue transition-colors" />
                     <input 
                       type={showPassword ? "text" : "password"}
                       required
                       placeholder="••••••••"
                       value={formData.password}
                       onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                      className="w-full bg-aurora-bg border border-aurora-border rounded-xl pl-11 pr-12 py-3.5 text-xs font-bold text-aurora-dark outline-none focus:border-aurora-blue focus:ring-4 focus:ring-aurora-blue/5 transition-all tracking-[0.3em]"
+                      className="w-full bg-scrutiq-bg border border-scrutiq-border rounded-xl pl-11 pr-12 py-3.5 text-xs font-bold text-scrutiq-dark outline-none focus:border-scrutiq-blue focus:ring-4 focus:ring-scrutiq-blue/5 transition-all tracking-[0.3em]"
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-4 text-aurora-muted hover:text-aurora-blue transition-colors"
+                      className="absolute right-4 text-scrutiq-muted hover:text-scrutiq-blue transition-colors"
                     >
                       {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                     </button>
@@ -190,19 +190,19 @@ const RegisterPage = () => {
                 <div className="space-y-2">
                   <label className="text-[10px] font-black tracking-widest ml-1">Confirm password</label>
                   <div className="relative flex items-center group">
-                    <Lock className="size-4 absolute left-4 text-aurora-muted group-focus-within:text-aurora-blue transition-colors" />
+                    <Lock className="size-4 absolute left-4 text-scrutiq-muted group-focus-within:text-scrutiq-blue transition-colors" />
                     <input 
                       type={showConfirmPassword ? "text" : "password"}
                       required
                       placeholder="••••••••"
                       value={formData.confirmPassword}
                       onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                      className="w-full bg-aurora-bg border border-aurora-border rounded-xl pl-11 pr-12 py-3.5 text-xs font-bold text-aurora-dark outline-none focus:border-aurora-blue focus:ring-4 focus:ring-aurora-blue/5 transition-all tracking-[0.3em]"
+                      className="w-full bg-scrutiq-bg border border-scrutiq-border rounded-xl pl-11 pr-12 py-3.5 text-xs font-bold text-scrutiq-dark outline-none focus:border-scrutiq-blue focus:ring-4 focus:ring-scrutiq-blue/5 transition-all tracking-[0.3em]"
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-4 text-aurora-muted hover:text-aurora-blue transition-colors"
+                      className="absolute right-4 text-scrutiq-muted hover:text-scrutiq-blue transition-colors"
                     >
                       {showConfirmPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                     </button>
@@ -212,7 +212,7 @@ const RegisterPage = () => {
                 <button 
                   type="submit"
                   disabled={isLoading}
-                  className="md:col-span-2 btn-primary w-full flex items-center justify-center gap-3 py-4 shadow-xl shadow-aurora-blue/20 disabled:opacity-50 mt-4"
+                  className="md:col-span-2 btn-primary w-full flex items-center justify-center gap-3 py-4 shadow-xl shadow-scrutiq-blue/20 disabled:opacity-50 mt-4"
                 >
                   {isLoading ? <RefreshCcw className="size-5 animate-spin" /> : <>
                     <span className="text-[13px] font-black tracking-widest">Register account</span>
@@ -232,7 +232,7 @@ const RegisterPage = () => {
                 <div className="space-y-2">
                   <label className="text-[10px] font-black tracking-widest ml-1 text-center block">Verification code</label>
                   <div className="relative flex items-center group max-w-[240px] mx-auto">
-                    <Hash className="size-4 absolute left-4 text-aurora-muted group-focus-within:text-aurora-blue transition-colors" />
+                    <Hash className="size-4 absolute left-4 text-scrutiq-muted group-focus-within:text-scrutiq-blue transition-colors" />
                     <input 
                       type="text"
                       required
@@ -240,7 +240,7 @@ const RegisterPage = () => {
                       placeholder="000 000"
                       value={verificationCode}
                       onChange={(e) => setVerificationCode(e.target.value)}
-                      className="w-full bg-aurora-bg border border-aurora-border rounded-xl pl-11 pr-4 py-4 text-center text-lg font-black text-aurora-dark outline-none focus:border-aurora-blue focus:ring-4 focus:ring-aurora-blue/5 transition-all tracking-[0.5em]"
+                      className="w-full bg-scrutiq-bg border border-scrutiq-border rounded-xl pl-11 pr-4 py-4 text-center text-lg font-black text-scrutiq-dark outline-none focus:border-scrutiq-blue focus:ring-4 focus:ring-scrutiq-blue/5 transition-all tracking-[0.5em]"
                     />
                   </div>
                 </div>
@@ -248,7 +248,7 @@ const RegisterPage = () => {
                 <button 
                   type="submit"
                   disabled={isLoading || verificationCode.length < 6}
-                  className="btn-primary w-full flex items-center justify-center gap-3 py-4 shadow-xl shadow-aurora-blue/20 disabled:opacity-50"
+                  className="btn-primary w-full flex items-center justify-center gap-3 py-4 shadow-xl shadow-scrutiq-blue/20 disabled:opacity-50"
                 >
                   {isLoading ? <RefreshCcw className="size-5 animate-spin" /> : <>
                     <span className="text-[13px] font-black tracking-widest">Activate account</span>
@@ -260,7 +260,7 @@ const RegisterPage = () => {
                    <button 
                      type="button" 
                      onClick={() => setStep("register")}
-                     className="text-[10px] font-black text-aurora-blue tracking-widest hover:underline"
+                     className="text-[10px] font-black text-scrutiq-blue tracking-widest hover:underline"
                    >
                      Wrong details? Go back
                    </button>
@@ -269,16 +269,16 @@ const RegisterPage = () => {
             )}
           </AnimatePresence>
 
-          <div className="mt-8 pt-8 border-t border-aurora-border/50 text-center">
-            <p className="text-[10px] font-bold text-aurora-muted tracking-widest">
+          <div className="mt-8 pt-8 border-t border-scrutiq-border/50 text-center">
+            <p className="text-[10px] font-bold text-scrutiq-muted tracking-widest">
               Already have a portal account? 
-              <Link href="/login" className="text-aurora-blue ml-2 hover:underline">Sign in to your dashboard</Link>
+              <Link href="/login" className="text-scrutiq-blue ml-2 hover:underline">Sign in to your dashboard</Link>
             </p>
           </div>
         </div>
 
         <div className="text-center">
-          <Link href="/" className="text-[10px] font-black text-aurora-muted tracking-widest hover:text-aurora-dark transition-colors">
+          <Link href="/" className="text-[10px] font-black text-scrutiq-muted tracking-widest hover:text-scrutiq-dark transition-colors">
             ← Back to Home
           </Link>
         </div>

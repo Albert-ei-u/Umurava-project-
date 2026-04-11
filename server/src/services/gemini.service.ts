@@ -97,13 +97,17 @@ class GeminiService {
       {
         "candidateId": "string (MUST MATCH THE ID PROVIDED)",
         "candidateName": "string (Extract their ACTUAL REAL NAME from the CV text. DO NOT use the placeholder name provided above if the real name is found.)",
-        "candidateEmail": "string (Extract their ACTUAL EMAIL from the CV text.)",
+        "candidateEmail": "string (Extract their ACTUAL EMAIL from the CV text. Emails are often hidden as links or after icons—search with all your might, but NEVER guess. If no valid email address is found, return 'No email available'.)",
+        "candidateGender": "string (Extract their GENDER as 'M', 'F', or 'Not stated'. Look for specific pronouns or declarations, but NEVER guess based on name alone. If unsure, return 'Not stated'.)",
+
+
         "microSummary": "string (20 words max technical summary of their specific experience)",
         "matchScore": number (Calculate strict total 0-100),
-        "strengths": ["string"],
-        "gaps": ["string"],
+
+        "strengths": ["string (High-level professional advantage)"],
+        "weaknesses": ["string (Specific technical or experience area to improve for future applications)"],
         "finalRecommendation": "Priority Alignment" | "Technical Fit" | "Potential Fit" | "No Alignment",
-        "reasoning": "A 2-3 sentence summary explaining the score and key gaps. Just pure paragraph text."
+        "reasoning": "A 2-3 sentence summary explaining the score and key areas for improvement. Just pure paragraph text."
       }
       
       Make sure to format the 'reasoning' field EXACTLY like the string template above, filling in the actual numbers and summary text. Use \\n for line breaks in the string.
@@ -145,14 +149,26 @@ class GeminiService {
       return parsedResults;
     } catch (error: any) {
       console.error("[AI SERVICE FAULT]:", error.message || error);
-      if (error instanceof SyntaxError) {
-        throw new Error(
-          "The AI response could not be parsed as valid data. Retrying may help.",
-        );
+      
+      const msg = error.message?.toLowerCase() || "";
+      
+      if (msg.includes("limit") || msg.includes("quota")) {
+        throw new Error("Our AI partner is currently at full capacity for your account. Please wait a moment or upgrade your screening tokens.");
       }
-      throw new Error(
-        error.message || "Failed to execute AI screening protocol.",
-      );
+      
+      if (msg.includes("503") || msg.includes("overloaded") || msg.includes("demand")) {
+        throw new Error("The AI brain is experiencing high demand. We tried to retry for you, but it's still busy. Please try again in 1 minute.");
+      }
+
+      if (msg.includes("api key") || msg.includes("invalid")) {
+        throw new Error("Technical setup error: The AI brain key is missing or invalid. Please check your system configuration.");
+      }
+
+      if (error instanceof SyntaxError) {
+        throw new Error("The AI gave us a response we couldn't read correctly. This sometimes happens with complex resumes. Trying again usually fixes it!");
+      }
+
+      throw new Error("We encountered a small hiccup while talking to the AI. Please try running the screening one more time.");
     }
   }
 }

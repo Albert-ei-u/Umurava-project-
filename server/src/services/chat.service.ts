@@ -19,10 +19,19 @@ const CHAT_CONFIG = {
       - ACCESS: You can fetch any profile, job, or system statistic.
       - ACTION: You can trigger screenings, adjust criteria, and DELETE records when requested.
       - CONTEXT: You always have a real-time pulse on the app's activity.
+      CRITICAL COMMUNICATION GUIDELINES:
+      You operate in a Next.js frontend GUI environment. The user relies on clicking buttons and navigating visually. 
+      NEVER tell the user to use tools like "list_applicants", "get_rankings", "jobId", or any underscore_formatted backend variables. You must explain workflows based on the following FRONTEND UI Map:
       
-      TONE: High-authority, analytical, precise, and proactive.
-      If a user asks for 'stats' or 'how many', use get_system_overview.
-      If a user asks to 'remove' or 'delete', explain what you are doing before using the delete tools.
+      - DASHBOARD (Overview Tab): A visual summary of their total jobs, total screened applicants, and platform activity.
+      - JOBS PAGE: Where users can click "New Job" to create a role, archive/restore jobs via the 3-dots menu, or click into a job to view its details.
+      - JOB DETAILS PAGE (Clicking a job): Has two tabs: 'Judgement Criteria' (To update job description) and 'Applicants & Rankings'. If they want to view screenings, tell them to go to Jobs -> click a Job -> open 'Applicants & Rankings' tab. Here they can also search applicant names or toggle the "Duplicates" filter.
+      - APPLICANTS PAGE: Where users upload CVs (PDFs). They can see the full candidate registry here. If they need to fix a duplicate, they click "Resolve Conflicts" and use the "Resolve Duplicate" banner button.
+      - SCREENING PAGE: A 4-step wizard. Step 1: Choose a Job. Step 2: Select Candidates (they can use the "Select All" button here). Step 3: Wait for AI. Step 4: View ranked results.
+      
+      If a user asks how to do something, describe the physical clicks and pages using the map above! Do not explain your own backend tool actions. You execute tools silently in the background when needed, but your textual explanation to the user must stay locked in the frontend reality.
+      
+      TONE: High-authority, human-friendly, precise, and proactive.
     `}]
   },
   tools: [{
@@ -58,7 +67,18 @@ export class ChatService {
       .map(h => `${h.role === "user" ? "Recruiter" : "AI Assistant"}: ${h.content}`)
       .join("\n");
 
+    const userContext = ownerId && ownerId !== "global" 
+      ? await import("../models/User.model").then(m => {
+          const conditions: any[] = [{ id: ownerId }, { email: ownerId }];
+          if (/^[0-9a-fA-F]{24}$/.test(ownerId)) conditions.push({ _id: ownerId });
+          return m.default.findOne({ $or: conditions });
+        }) 
+      : null;
+
     const prompt = `
+      CURRENT USER CONTEXT:
+      ${userContext ? `Name: ${userContext.fullName}, Email: ${userContext.email}, Company: ${userContext.companyName}, Role: ${userContext.role}` : "Anonymous/Global Administrator"}
+
       CONTEXT HISTORY:
       ${formattedHistory}
       
@@ -66,14 +86,28 @@ export class ChatService {
       ${message}
       
       TASK:
-      Analyze and execute. You are connected to the central database.
+      Analyze and execute. You understand the context of the user speaking to you.
     `;
 
     try {
       return await this.executeStatelessCycle(prompt, ownerId);
     } catch (error: any) {
       console.error("[CHAT AGENT FAULT]:", error.message);
-      throw new Error(`Sync Error: ${error.message}`);
+      const msg = error.message?.toLowerCase() || "";
+      
+      if (msg.includes("limit") || msg.includes("quota")) {
+        throw new Error("I'm currently talking to too many people! Please give me a second to catch my breath and try again.");
+      }
+      
+      if (msg.includes("503") || msg.includes("overloaded") || msg.includes("demand")) {
+        throw new Error("The AI brain is a bit overwhelmed right now. I tried to reconnect but couldn't quite get through. Could you try your message again in a minute?");
+      }
+
+      if (msg.includes("api key") || msg.includes("invalid")) {
+        throw new Error("I seem to have lost my connection key. Please ask your administrator to check the system settings.");
+      }
+
+      throw new Error("I had a little hiccup while thinking about that. Could you try sending your message one more time?");
     }
   }
 

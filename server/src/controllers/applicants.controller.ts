@@ -43,12 +43,19 @@ class ApplicantsController {
       ]);
 
       const totalResults = [...fileResults, ...urlResults];
+      const duplicateCount = totalResults.filter(r => r.isDuplicate).length;
+      const newCount = totalResults.length - duplicateCount;
 
       return res.status(201).json({
         status: "success",
-        message: `${totalResults.length} technical profiles successfully ingested into the registry.`,
+        message: `${newCount} new profiles ingested, ${duplicateCount} potential duplicates flagged.`,
         protocol: "HYBRID_INGESTION_v2",
-        data: totalResults,
+        data: {
+          total: totalResults.length,
+          newCount,
+          duplicateCount,
+          results: totalResults
+        },
       });
     } catch (error: any) {
       console.error("[INGESTION FAULT] System failure during hybrid ingestion:", error);
@@ -116,6 +123,21 @@ class ApplicantsController {
       await emailService.sendCustomEmail(targetEmail, subject, message);
 
       return res.status(200).json({ status: "success", message: "Email dispatched successfully." });
+    } catch (error: any) {
+      return res.status(500).json({ status: "fault", message: error.message });
+    }
+  }
+  async handleResolveDuplicate(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const { action } = req.body; // "keep_original" or "keep_new"
+      
+      const result = await applicantsService.resolveDuplicate(id, action);
+      return res.status(200).json({ 
+        status: "success", 
+        message: action === "keep_original" ? "Duplicate discarded." : "Profile updated with new version.",
+        data: result 
+      });
     } catch (error: any) {
       return res.status(500).json({ status: "fault", message: error.message });
     }

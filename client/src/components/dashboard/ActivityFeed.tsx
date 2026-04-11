@@ -38,7 +38,7 @@ const ActivityFeed = () => {
         color:
           act.type === "INGESTION"
             ? "bg-emerald-50 text-emerald-600"
-            : "bg-aurora-blue/10 text-aurora-blue",
+            : "bg-scrutiq-blue/10 text-scrutiq-blue",
       }));
 
       // Fallback for demo completeness if backend is lean
@@ -69,8 +69,8 @@ const ActivityFeed = () => {
   if (isLoading) {
     return (
       <div className="admin-card p-12 flex flex-col items-center justify-center space-y-4">
-        <RefreshCcw className="size-6 text-aurora-blue animate-spin" />
-        <p className="text-[10px] font-black text-aurora-muted uppercase tracking-widest">
+        <RefreshCcw className="size-6 text-scrutiq-blue animate-spin" />
+        <p className="text-[10px] font-black text-scrutiq-muted uppercase tracking-widest">
           Streaming Technical Logs...
         </p>
       </div>
@@ -79,22 +79,22 @@ const ActivityFeed = () => {
 
   return (
     <div className="admin-card overflow-hidden">
-      <div className="p-6 border-b border-aurora-border/50 bg-aurora-bg/10 flex items-center justify-between">
-        <h2 className="text-sm font-black text-aurora-dark uppercase tracking-widest">
+      <div className="p-6 border-b border-scrutiq-border/50 bg-scrutiq-bg/10 flex items-center justify-between">
+        <h2 className="text-sm font-black text-scrutiq-dark uppercase tracking-widest">
           Global Activity Stream
         </h2>
         <button
           onClick={fetchActivity}
           className="p-1.5 hover:bg-white rounded-lg transition-all"
         >
-          <RefreshCcw className="size-3.5 text-aurora-muted" />
+          <RefreshCcw className="size-3.5 text-scrutiq-muted" />
         </button>
       </div>
-      <div className="divide-y divide-aurora-border/30">
+      <div className="divide-y divide-scrutiq-border/30">
         {activities.map((activity) => (
           <div
             key={activity.id}
-            className="p-5 flex items-start gap-4 hover:bg-aurora-bg/30 transition-all group cursor-default"
+            className="p-5 flex items-start gap-4 hover:bg-scrutiq-bg/30 transition-all group cursor-default"
           >
             <div
               className={`p-2.5 rounded-xl border border-transparent group-hover:border-white shadow-sm transition-all ${activity.color}`}
@@ -103,24 +103,24 @@ const ActivityFeed = () => {
             </div>
             <div className="flex-1 space-y-0.5">
               <div className="flex items-center justify-between">
-                <p className="text-xs font-black text-aurora-dark uppercase tracking-tight">
+                <p className="text-xs font-black text-scrutiq-dark uppercase tracking-tight">
                   {activity.message}
                 </p>
-                <span className="text-[9px] font-bold text-aurora-muted uppercase tracking-widest">
+                <span className="text-[9px] font-bold text-scrutiq-muted uppercase tracking-widest">
                   {activity.time}
                 </span>
               </div>
-              <p className="text-[10px] font-bold text-aurora-muted uppercase tracking-widest leading-none truncate">
+              <p className="text-[10px] font-bold text-scrutiq-muted uppercase tracking-widest leading-none truncate">
                 {activity.target}
               </p>
             </div>
-            <button className="opacity-0 group-hover:opacity-100 transition-all p-1.5 hover:bg-white rounded-lg border border-aurora-border shadow-sm">
-              <ArrowUpRight className="size-3 text-aurora-blue" />
+            <button className="opacity-0 group-hover:opacity-100 transition-all p-1.5 hover:bg-white rounded-lg border border-scrutiq-border shadow-sm">
+              <ArrowUpRight className="size-3 text-scrutiq-blue" />
             </button>
           </div>
         ))}
       </div>
-      <button className="w-full py-4 text-[9px] font-black text-aurora-muted hover:text-aurora-blue uppercase tracking-widest border-t border-aurora-border/50 hover:bg-aurora-bg transition-all">
+      <button className="w-full py-4 text-[9px] font-black text-scrutiq-muted hover:text-scrutiq-blue uppercase tracking-widest border-t border-scrutiq-border/50 hover:bg-scrutiq-bg transition-all">
         View All Activity
       </button>
     </div>

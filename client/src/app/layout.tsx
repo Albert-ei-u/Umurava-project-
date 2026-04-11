@@ -13,6 +13,11 @@ const jakarta = Plus_Jakarta_Sans({
 export const metadata: Metadata = {
   title: "Scrutiq | Advanced Talent Analysis Portal",
   description: "Modern administrative portal for technical talent assessment and high-fidelity screening.",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+    apple: "/favicon.svg",
+  },
 };
 
 export default function RootLayout({
@@ -22,7 +27,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body suppressHydrationWarning className={`${jakarta.variable} font-jakarta antialiased text-aurora-muted bg-aurora-bg selection:bg-aurora-blue/20 selection:text-aurora-blue`}>
+      <body suppressHydrationWarning className={`${jakarta.variable} font-jakarta antialiased text-scrutiq-muted bg-scrutiq-bg selection:bg-scrutiq-blue/20 selection:text-scrutiq-blue`}>
         <Providers>
           {children}
           <Toaster 

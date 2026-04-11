@@ -13,40 +13,50 @@ class StatsController {
   async getSystemStats(req: Request, res: Response) {
     try {
       const ownerId = req.headers['x-owner-id'] as string | undefined;
-      
+      const range = (req.query.range as string) || "weekly"; // weekly, monthly, annual
+
       // Determine applicable jobs for the owner
       const userJobsQuery = ownerId ? { ownerId } : {};
       const totalJobs = await Job.countDocuments(userJobsQuery);
       const totalApplicants = await Applicant.countDocuments(userJobsQuery);
       
       // We must isolate screenings to only jobs owned by this recruiter
-      const userJobs = await Job.find(userJobsQuery).select('id _id');
+      const userJobs = await Job.find(userJobsQuery).select('id _id title department');
       const jobIds = userJobs.map(j => (j.id || j._id).toString());
       
-      const screeningQuery = jobIds.length > 0 ? { jobId: { $in: jobIds } } : { _id: null }; // _id: null ensures no match if no jobs
+      const screeningQuery = jobIds.length > 0 ? { jobId: { $in: jobIds } } : { _id: null };
       const totalScreenings = await Screening.countDocuments(screeningQuery);
 
-      // 2. Job Distribution (By Department)
+      // 2. Job Distribution
       const jobDist = await Job.aggregate([
         { $match: userJobsQuery },
         { $group: { _id: "$department", count: { $sum: 1 } } }
       ]);
 
-      // 3. Screening Accuracy (Average Match Score)
+      // 3. Screening Accuracy
       const avgScore = await Screening.aggregate([
         { $match: screeningQuery },
         { $group: { _id: null, avg: { $avg: "$matchScore" } } }
       ]);
 
-      // 4. Activity Over Time (Last 7 Days)
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      
+      // 4. Activity Over Time (Dynamic Range)
+      const sinceDate = new Date();
+      let format = "%Y-%m-%d";
+
+      if (range === "weekly") {
+        sinceDate.setDate(sinceDate.getDate() - 7);
+      } else if (range === "monthly") {
+        sinceDate.setDate(sinceDate.getDate() - 30);
+      } else if (range === "annual") {
+        sinceDate.setMonth(sinceDate.getMonth() - 12);
+        format = "%Y-%m"; // Group by month for annual view
+      }
+
       const activity = await Screening.aggregate([
-        { $match: { ...screeningQuery, createdAt: { $gte: sevenDaysAgo } } },
+        { $match: { ...screeningQuery, updatedAt: { $gte: sinceDate } } },
         {
           $group: {
-            _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+            _id: { $dateToString: { format, date: "$updatedAt" } },
             count: { $sum: 1 },
             avgQuality: { $avg: "$matchScore" }
           }
@@ -59,13 +69,17 @@ class StatsController {
         activeJobs: totalJobs,
         candidates: totalApplicants,
         matchSuccessRate: avgScore[0]?.avg || 0,
-        jobDistribution: jobDist.map(d => ({ name: d._id, value: d.count })),
+        jobDistribution: jobDist.map(d => ({ name: d._id || "Uncategorized", value: d.count })),
+        detailedDistribution: userJobs.map((j: any) => ({
+          title: j.title || "Untitled Position",
+          department: j.department || "Uncategorized"
+        })),
         performanceData: activity.map(a => ({ 
           name: a._id, 
           screenings: a.count, 
           quality: Math.round(a.avgQuality)
         })),
-        calibrationIndex: 98.4,
+        range: range,
       };
 
       return res.status(200).json({ 

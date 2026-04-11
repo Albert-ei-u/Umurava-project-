@@ -16,11 +16,11 @@ export default function DashboardLayout({
   return (
     <AuthGuard>
       <NotificationProvider>
-        <div className="flex h-screen overflow-hidden bg-aurora-bg">
+        <div className="flex h-screen overflow-hidden bg-scrutiq-bg">
           {/* Mobile Sidebar Overlay */}
           {sidebarOpen && (
             <div
-              className="fixed inset-0 z-40 bg-aurora-dark/30 backdrop-blur-sm lg:hidden"
+              className="fixed inset-0 z-40 bg-scrutiq-dark/30 backdrop-blur-sm lg:hidden"
               onClick={() => setSidebarOpen(false)}
             />
           )}
@@ -37,7 +37,7 @@ export default function DashboardLayout({
           {/* Main Content */}
           <div className="flex flex-col flex-1 min-w-0 overflow-hidden">
             <Navbar onMenuClick={() => setSidebarOpen(true)} />
-            <main className="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8 custom-scrollbar">
+            <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-6 md:p-8 custom-scrollbar relative">
               {children}
             </main>
           </div>
