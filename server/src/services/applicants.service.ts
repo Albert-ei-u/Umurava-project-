@@ -10,6 +10,14 @@ const queueExtraction = <T>(task: () => Promise<T>): Promise<T> => {
   return result;
 };
 
+interface PreparedIngestionData {
+  text: string;
+  ownerId: string;
+  source: string;
+  email?: string;
+  resumeUrl?: string;
+}
+
 class ApplicantsService {
   /**
    * Candidate Registry Retrieval:
@@ -75,7 +83,7 @@ class ApplicantsService {
     console.log(`[INGESTION] Multi-file request: ${files.length} dossiers received.`);
 
     // --- PHASE 1: SEQUENTIAL EXTRACTION & PERSISTENCE ---
-    const preparedData = [];
+    const preparedData: PreparedIngestionData[] = [];
     for (let i = 0; i < files.length; i++) {
         try {
             const dataResults = await this.prepareFileData(files[i], ownerId, emails[i]);
@@ -113,7 +121,7 @@ class ApplicantsService {
 
   async ingestFromUrls(urls: string[], ownerId: string) {
     const axios = (await import("axios")).default;
-    const preparedData = [];
+    const preparedData: PreparedIngestionData[] = [];
 
     // --- PHASE 1: SEQUENTIAL URL FETCH & EXTRACTION ---
     for (const url of urls) {
@@ -283,7 +291,8 @@ class ApplicantsService {
               text: rowText,
               ownerId,
               source: `${file.originalname} (Row ${index + 1})`,
-              email: row.email || row.Email || email
+              email: row.email || row.Email || email,
+              resumeUrl: undefined
             };
           });
         }

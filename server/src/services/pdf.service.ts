@@ -58,7 +58,8 @@ class PDFService {
       doc.moveDown(0.5);
       
       data.workExperience.forEach((exp: any) => {
-        doc.fillColor("#111827").fontSize(12).text(`${exp.role} at ${exp.company}`, { bold: true });
+        doc.fillColor("#111827").fontSize(12).font("Helvetica-Bold").text(`${exp.role} at ${exp.company}`);
+        doc.font("Helvetica"); // Reset to regular
         doc.fillColor("#6b7280").fontSize(10).text(`${exp.startDate} - ${exp.endDate || "Present"}`);
         doc.moveDown(0.2);
         doc.fillColor("#374151").fontSize(10).text(exp.description || "", { align: "justify" });
