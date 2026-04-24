@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 :root {
-  --stq-blue: #0866FF;
-  --stq-blue-hover: #1877F2;
-  --stq-blue-active: #166FE5;
+  --stq-blue: #0866ff;
+  --stq-blue-hover: #1877f2;
+  --stq-blue-active: #166fe5;
   --stq-dark: #050505;
   --stq-muted: #65676b;
   --stq-border: #ced0d4;
@@ -13,20 +13,17 @@
 }
 
 .dark {
-  --stq-blue: #2E89FF;
-  --stq-blue-hover: #4E9BFF;
-  --stq-blue-active: #1D5FB9;
-  --stq-dark: #FFFFFF;
+  --stq-blue: #2e89ff;
+  --stq-blue-hover: #4e9bff;
+  --stq-blue-active: #1d5fb9;
+  --stq-dark: #ffffff;
 
-  --stq-muted: #B0B3B8;
-  --stq-border: #3E4042;
-  --stq-bg: #18191A;
+  --stq-muted: #b0b3b8;
+  --stq-border: #3e4042;
+  --stq-bg: #18191a;
   --stq-surface: #242526;
-  --stq-hover: #3A3B3C;
+  --stq-hover: #3a3b3c;
 }
-
-
-
 
 @theme {
   --color-scrutiq-blue: var(--stq-blue);
@@ -49,12 +46,6 @@
   --stq-logo-filter: invert(1);
 }
 
-
-
-
-
-
-
 @layer base {
   html {
     font-size: 16px;
@@ -66,7 +57,12 @@
     @apply font-jakarta bg-scrutiq-bg text-scrutiq-muted antialiased text-[15px] leading-relaxed;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-jakarta font-black tracking-tighter text-scrutiq-dark;
   }
 
@@ -115,4 +111,3 @@
 ::-webkit-scrollbar-thumb {
   @apply bg-scrutiq-border rounded-full hover:bg-scrutiq-muted transition-colors;
 }
-

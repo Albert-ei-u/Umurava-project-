@@ -78,8 +78,12 @@ class ApplicantsService {
     const preparedData = [];
     for (let i = 0; i < files.length; i++) {
         try {
-            const data = await this.prepareFileData(files[i], ownerId, emails[i]);
-            if (data) preparedData.push(data);
+            const dataResults = await this.prepareFileData(files[i], ownerId, emails[i]);
+            if (dataResults && Array.isArray(dataResults)) {
+              preparedData.push(...dataResults);
+            } else if (dataResults) {
+              preparedData.push(dataResults);
+            }
         } catch (err) {
             console.error(`[INGESTION ERROR] Phase 1 failed for ${files[i].originalname}:`, err);
         }
@@ -123,6 +127,9 @@ class ApplicantsService {
         if (url.includes("docs.google.com/document") && docId) {
           targetUrl = `https://docs.google.com/document/d/${docId}/export?format=pdf`;
           fileName = `Doc-${docId}.pdf`;
+        } else if (url.includes("docs.google.com/spreadsheets") && docId) {
+          targetUrl = `https://docs.google.com/spreadsheets/d/${docId}/export?format=csv`;
+          fileName = `Sheet-${docId}.csv`;
         } else if (url.includes("drive.google.com/file") && docId) {
           targetUrl = `https://docs.google.com/uc?id=${docId}&export=download`;
           fileName = `Drive-${docId}.pdf`;
@@ -179,7 +186,13 @@ class ApplicantsService {
 
 
         const res = await this.prepareFileData(file, ownerId);
-        if (res) preparedData.push(res);
+        if (res) {
+          if (Array.isArray(res)) {
+            preparedData.push(...res);
+          } else {
+            preparedData.push(res);
+          }
+        }
       } catch (error: any) {
         console.error(`[URL INGESTION FAULT] ${url}:`, error.message);
       }
@@ -241,6 +254,39 @@ class ApplicantsService {
         const mammoth = await import("mammoth");
         const result = await mammoth.extractRawText({ buffer: bufferClone });
         text = result.value;
+      } else if (ext === "csv" || mime.includes("csv")) {
+        // Handle CSV with potentially multiple profiles
+        const results: any[] = [];
+        const stream = require("stream");
+        const csv = require("csv-parser");
+        
+        const bufferStream = new stream.PassThrough();
+        bufferStream.end(bufferClone);
+        
+        const rows: any[] = [];
+        await new Promise((resolve, reject) => {
+          bufferStream
+            .pipe(csv())
+            .on("data", (data: any) => rows.push(data))
+            .on("end", resolve)
+            .on("error", reject);
+        });
+
+        if (rows.length > 0) {
+          return rows.map((row, index) => {
+            // Combine all row values into a descriptive text for AI extraction
+            const rowText = Object.entries(row)
+              .map(([key, value]) => `${key}: ${value}`)
+              .join("\n");
+            
+            return {
+              text: rowText,
+              ownerId,
+              source: `${file.originalname} (Row ${index + 1})`,
+              email: row.email || row.Email || email
+            };
+          });
+        }
       }
 
       if (!text || text.trim().length < 50) {
@@ -248,13 +294,13 @@ class ApplicantsService {
           return null;
       }
 
-      return {
+      return [{
         text,
         ownerId,
         source: file.originalname,
         email,
-        resumeUrl: `resumes/${fileName}`
-      };
+        resumeUrl: (ext === "pdf") ? `resumes/${fileName}` : undefined
+      }];
     } catch (error: any) {
       console.error(`[EXTRACTION ERROR] ${file.originalname}:`, error.message);
       return null;
@@ -263,6 +309,7 @@ class ApplicantsService {
 
   private async processTextViaAI(rawText: string, ownerId: string, source: string, fallbackEmail?: string, resumeUrl?: string) {
     const geminiService = (await import("./gemini.service")).default;
+    const pdfService = (await import("./pdf.service")).default;
     const crypto = await import("crypto");
     
     const prompt = `
@@ -352,6 +399,20 @@ class ApplicantsService {
             }
           }
 
+          // Generate PDF if not present (CSV/Link/Text ingestion)
+          let finalResumeUrl = resumeUrl;
+          let isAiGenerated = false;
+          if (!finalResumeUrl) {
+            try {
+              const uniqueId = Date.now() + '-' + Math.random().toString(36).substring(2, 6);
+              const pdfFileName = `AI-CV-${uniqueId}.pdf`;
+              finalResumeUrl = await pdfService.generateApplicantResume(data, pdfFileName);
+              isAiGenerated = true;
+            } catch (pdfErr) {
+              console.error("[PDF GENERATION FAULT]:", pdfErr);
+            }
+          }
+
           const applicant = new Applicant({
             // Legacy Support (Populate for backward compatibility)
             name: data.firstName && data.lastName ? `${data.firstName} ${data.lastName}` : (data.name || source.replace(/\.[^/.]+$/, "")),
@@ -376,9 +437,10 @@ class ApplicantsService {
             socialLinks: data.socialLinks,
 
             resumeText: rawText,
-            resumeUrl,
+            resumeUrl: finalResumeUrl,
             ownerId,
             isDuplicate,
+            isAiGenerated,
             originalCandidateId: originalId,
             similarityScore: similarity,
             profileStatus: isDuplicate ? "Duplicate" : "Pending"
@@ -396,10 +458,27 @@ class ApplicantsService {
     const result = await Applicant.findByIdAndDelete(id);
     
     // --- REACTIVE AUDIT ---
-    // If we just deleted a primary record, any profiles pointing to it as a duplicate
-    // must be promoted to prevent infinite "Duplicate" stagnation.
     await Applicant.updateMany(
       { originalCandidateId: id },
+      { 
+        $set: { 
+          isDuplicate: false, 
+          profileStatus: "Verified",
+          similarityScore: 0
+        },
+        $unset: { originalCandidateId: "" }
+      }
+    );
+    
+    return result;
+  }
+
+  async deleteApplicantsBulk(ids: string[]) {
+    const result = await Applicant.deleteMany({ _id: { $in: ids } });
+    
+    // Cleanup duplicate links for all deleted IDs
+    await Applicant.updateMany(
+      { originalCandidateId: { $in: ids } },
       { 
         $set: { 
           isDuplicate: false, 

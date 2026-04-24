@@ -73,7 +73,6 @@ const DashboardPage = () => {
     }
   };
 
-
   return (
     <div className="space-y-6 animate-in fade-in duration-500">
       <div className="flex flex-col md:flex-row md:items-center justify-between bg-scrutiq-surface p-4 md:p-6 rounded-3xl border border-scrutiq-border shadow-sm gap-4">
@@ -126,56 +125,55 @@ const DashboardPage = () => {
         ))}
       </div>
 
-        <div className="lg:col-span-3 space-y-4">
-          <div className="admin-card p-6 bg-scrutiq-surface relative overflow-hidden group">
-            <div className="relative z-10 space-y-6">
-              <div className="space-y-2">
-                <h2 className="text-2xl font-black text-scrutiq-dark tracking-tight">
-                  Workflow guide
-                </h2>
-                <p className="text-xs font-bold text-scrutiq-muted tracking-widest max-w-md">
-                  Follow these simple steps to find your best talent.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <Link
-                  href="/dashboard/applicants"
-                  className="p-6 bg-scrutiq-bg border border-scrutiq-border rounded-2xl hover:border-scrutiq-blue hover:shadow-xl transition-all group/card"
-                >
-                  <div className="size-10 rounded-xl bg-scrutiq-surface border border-scrutiq-border flex items-center justify-center mb-4 group-hover/card:bg-scrutiq-blue group-hover/card:text-white transition-all">
-                    <Upload className="size-5" />
-                  </div>
-                  <p className="text-[10px] font-black text-scrutiq-blue tracking-widest mb-1">
-                    First step
-                  </p>
-                  <h4 className="text-sm font-black text-scrutiq-dark tracking-tight mb-2">
-                    Upload resumes
-                  </h4>
-                  <p className="text-[10px] font-bold text-scrutiq-muted tracking-widest leading-relaxed">
-                    Add PDF applicant resumes to your profile list.
-                  </p>
-                </Link>
-                <Link
-                  href="/dashboard/screenings"
-                  className="p-6 bg-scrutiq-bg border border-scrutiq-border rounded-2xl hover:border-scrutiq-blue hover:shadow-xl transition-all group/card"
-                >
-                  <div className="size-10 rounded-xl bg-scrutiq-surface border border-scrutiq-border flex items-center justify-center mb-4 group-hover/card:bg-scrutiq-blue group-hover/card:text-white transition-all">
-                    <ShieldCheck className="size-5" />
-                  </div>
-                  <p className="text-[10px] font-black text-scrutiq-blue tracking-widest mb-1">
-                    Final step
-                  </p>
-                  <h4 className="text-sm font-black text-scrutiq-dark tracking-tight mb-2">
-                    Screening
-                  </h4>
-                  <p className="text-[10px] font-bold text-scrutiq-muted tracking-widest leading-relaxed">
-                    Run the screening to instantly rank your top applicants.
-                  </p>
-                </Link>
-              </div>
-
+      <div className="lg:col-span-3 space-y-4">
+        <div className="admin-card p-6 bg-scrutiq-surface relative overflow-hidden group">
+          <div className="relative z-10 space-y-6">
+            <div className="space-y-2">
+              <h2 className="text-2xl font-black text-scrutiq-dark tracking-tight">
+                Workflow guide
+              </h2>
+              <p className="text-xs font-bold text-scrutiq-muted tracking-widest max-w-md">
+                Follow these simple steps to find your best talent.
+              </p>
             </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <Link
+                href="/dashboard/applicants"
+                className="p-6 bg-scrutiq-bg border border-scrutiq-border rounded-2xl hover:border-scrutiq-blue hover:shadow-xl transition-all group/card"
+              >
+                <div className="size-10 rounded-xl bg-scrutiq-surface border border-scrutiq-border flex items-center justify-center mb-4 group-hover/card:bg-scrutiq-blue group-hover/card:text-white transition-all">
+                  <Upload className="size-5" />
+                </div>
+                <p className="text-[10px] font-black text-scrutiq-blue tracking-widest mb-1">
+                  First step
+                </p>
+                <h4 className="text-sm font-black text-scrutiq-dark tracking-tight mb-2">
+                  Upload resumes
+                </h4>
+                <p className="text-[10px] font-bold text-scrutiq-muted tracking-widest leading-relaxed">
+                  Add PDF applicant resumes to your profile list.
+                </p>
+              </Link>
+              <Link
+                href="/dashboard/screenings"
+                className="p-6 bg-scrutiq-bg border border-scrutiq-border rounded-2xl hover:border-scrutiq-blue hover:shadow-xl transition-all group/card"
+              >
+                <div className="size-10 rounded-xl bg-scrutiq-surface border border-scrutiq-border flex items-center justify-center mb-4 group-hover/card:bg-scrutiq-blue group-hover/card:text-white transition-all">
+                  <ShieldCheck className="size-5" />
+                </div>
+                <p className="text-[10px] font-black text-scrutiq-blue tracking-widest mb-1">
+                  Final step
+                </p>
+                <h4 className="text-sm font-black text-scrutiq-dark tracking-tight mb-2">
+                  Screening
+                </h4>
+                <p className="text-[10px] font-bold text-scrutiq-muted tracking-widest leading-relaxed">
+                  Run the screening to instantly rank your top applicants.
+                </p>
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </div>

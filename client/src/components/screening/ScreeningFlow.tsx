@@ -30,7 +30,7 @@ const ScreeningFlow = () => {
   const [selectedCandidates, setSelectedCandidates] = useState<string[]>([]);
   const [showModal, setShowModal] = useState(false);
   const [selectedResult, setSelectedResult] = useState<any>(null);
-  
+
   const [isResumeOpen, setIsResumeOpen] = useState(false);
   const [resumeCandidate, setResumeCandidate] = useState<any>(null);
 
@@ -48,7 +48,7 @@ const ScreeningFlow = () => {
 
   useEffect(() => {
     (window as any).openResumeDrawer = (candidateId: string) => {
-      const candidate = applicants.find(a => (a._id || a.id) === candidateId);
+      const candidate = applicants.find((a) => (a._id || a.id) === candidateId);
       if (candidate) {
         setResumeCandidate(candidate);
         setIsResumeOpen(true);
@@ -57,7 +57,9 @@ const ScreeningFlow = () => {
         notify("Could not find the original resume in the registry.", "error");
       }
     };
-    return () => { delete (window as any).openResumeDrawer; };
+    return () => {
+      delete (window as any).openResumeDrawer;
+    };
   }, [applicants]);
 
   const fetchRegistry = async () => {
@@ -97,10 +99,11 @@ const ScreeningFlow = () => {
     const progressInterval = setInterval(() => {
       currentProgress += progressIncrement;
       if (currentProgress < 30) setStatusMessage("Preparing job criteria...");
-      else if (currentProgress < 60) setStatusMessage("Comparing resumes to job requirements...");
+      else if (currentProgress < 60)
+        setStatusMessage("Comparing resumes to job requirements...");
       else if (currentProgress < 85) setStatusMessage("Calculating scores...");
       else setStatusMessage("Wrapping up...");
-      
+
       setProgress(Math.min(95, currentProgress));
     }, intervalTime);
 
@@ -114,7 +117,7 @@ const ScreeningFlow = () => {
         clearInterval(progressInterval);
         setProgress(100);
         setStatusMessage("Complete!");
-        
+
         setTimeout(() => {
           setResults(response.data.data);
           setStep(4);
@@ -210,35 +213,41 @@ const ScreeningFlow = () => {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {jobs.filter(j => j.status !== "Archived").length === 0 ? (
+                {jobs.filter((j) => j.status !== "Archived").length === 0 ? (
                   <div className="col-span-full admin-card p-12 text-center border-dashed">
-                     <p className="text-xs font-bold text-scrutiq-muted uppercase tracking-widest">No active jobs available for screening</p>
+                    <p className="text-xs font-bold text-scrutiq-muted uppercase tracking-widest">
+                      No active jobs available for screening
+                    </p>
                   </div>
-                ) : jobs.filter(j => j.status !== "Archived").map((job) => (
-                  <button
-                    key={job._id || job.id}
-                    onClick={() => setSelectedJob(job._id || job.id)}
-                    className={`p-6 rounded-2xl border-2 text-left transition-all group ${
-                      selectedJob === (job._id || job.id)
-                        ? "border-scrutiq-blue bg-scrutiq-blue/5 shadow-inner"
-                        : "border-scrutiq-border/50 hover:border-scrutiq-blue bg-scrutiq-bg/30"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="space-y-1">
-                        <span className="text-[9px] font-black text-scrutiq-muted uppercase tracking-widest block">
-                          JOB ID: {job._id || job.id}
-                        </span>
-                        <h3 className="text-sm font-black text-scrutiq-dark group-hover:text-scrutiq-blue transition-colors">
-                          {job.title}
-                        </h3>
-                      </div>
-                      <Briefcase
-                        className={`size-4 ${selectedJob === (job._id || job.id) ? "text-scrutiq-blue" : "text-scrutiq-muted"}`}
-                      />
-                    </div>
-                  </button>
-                ))}
+                ) : (
+                  jobs
+                    .filter((j) => j.status !== "Archived")
+                    .map((job) => (
+                      <button
+                        key={job._id || job.id}
+                        onClick={() => setSelectedJob(job._id || job.id)}
+                        className={`p-6 rounded-2xl border-2 text-left transition-all group ${
+                          selectedJob === (job._id || job.id)
+                            ? "border-scrutiq-blue bg-scrutiq-blue/5 shadow-inner"
+                            : "border-scrutiq-border/50 hover:border-scrutiq-blue bg-scrutiq-bg/30"
+                        }`}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="space-y-1">
+                            <span className="text-[9px] font-black text-scrutiq-muted uppercase tracking-widest block">
+                              JOB ID: {job._id || job.id}
+                            </span>
+                            <h3 className="text-sm font-black text-scrutiq-dark group-hover:text-scrutiq-blue transition-colors">
+                              {job.title}
+                            </h3>
+                          </div>
+                          <Briefcase
+                            className={`size-4 ${selectedJob === (job._id || job.id) ? "text-scrutiq-blue" : "text-scrutiq-muted"}`}
+                          />
+                        </div>
+                      </button>
+                    ))
+                )}
               </div>
 
               <div className="flex justify-end pt-4">
@@ -276,12 +285,16 @@ const ScreeningFlow = () => {
                     if (selectedCandidates.length === applicants.length) {
                       setSelectedCandidates([]);
                     } else {
-                      setSelectedCandidates(applicants.map((app) => app._id || app.id));
+                      setSelectedCandidates(
+                        applicants.map((app) => app._id || app.id),
+                      );
                     }
                   }}
                   className="text-[10px] font-black uppercase text-scrutiq-blue hover:text-scrutiq-dark transition-colors tracking-widest bg-scrutiq-blue/10 hover:bg-scrutiq-bg px-3 py-1.5 rounded-lg border border-scrutiq-blue/20 shrink-0"
                 >
-                  {selectedCandidates.length === applicants.length ? "Deselect All" : "Select All"}
+                  {selectedCandidates.length === applicants.length
+                    ? "Deselect All"
+                    : "Select All"}
                 </button>
               </div>
 
@@ -401,7 +414,7 @@ const ScreeningFlow = () => {
 
                 <div className="space-y-2">
                   <div className="h-4 w-full bg-scrutiq-bg border border-scrutiq-border rounded-full overflow-hidden relative">
-                    <motion.div 
+                    <motion.div
                       className="absolute left-0 top-0 bottom-0 bg-scrutiq-blue rounded-full"
                       initial={{ width: "0%" }}
                       animate={{ width: `${progress}%` }}
@@ -409,8 +422,13 @@ const ScreeningFlow = () => {
                     />
                   </div>
                   <div className="flex items-center justify-between px-1">
-                    <span className="text-[9px] font-black uppercase text-scrutiq-muted tracking-widest">Processing {selectedCandidates.length} profile{selectedCandidates.length !== 1 && 's'}</span>
-                    <span className="text-[10px] font-black text-scrutiq-blue tracking-widest">{Math.floor(progress)}%</span>
+                    <span className="text-[9px] font-black uppercase text-scrutiq-muted tracking-widest">
+                      Processing {selectedCandidates.length} profile
+                      {selectedCandidates.length !== 1 && "s"}
+                    </span>
+                    <span className="text-[10px] font-black text-scrutiq-blue tracking-widest">
+                      {Math.floor(progress)}%
+                    </span>
                   </div>
                 </div>
               </div>
@@ -525,20 +543,29 @@ const ScreeningFlow = () => {
                           <div className="flex items-center justify-end gap-2">
                             <button
                               onClick={() => {
-                                const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-                                const baseUrl = rawApiUrl.split('/api')[0].replace(/\/$/, "");
+                                const rawApiUrl =
+                                  process.env.NEXT_PUBLIC_API_URL ||
+                                  "http://localhost:5000/api";
+                                const baseUrl = rawApiUrl
+                                  .split("/api")[0]
+                                  .replace(/\/$/, "");
                                 const url = result.candidateResume;
                                 if (!url) {
-                                  notify("No original resume found for this candidate.", "info");
+                                  notify(
+                                    "No original resume found for this candidate.",
+                                    "info",
+                                  );
                                   return;
                                 }
                                 if (url.startsWith("http")) {
-                                   window.open(url, '_blank');
-                                   return;
+                                  window.open(url, "_blank");
+                                  return;
                                 }
-                                const sanitizedPath = url.replace(/^(\/?uploads\/)/, "").replace(/^\//, "");
+                                const sanitizedPath = url
+                                  .replace(/^(\/?uploads\/)/, "")
+                                  .replace(/^\//, "");
                                 const cleanPath = `/uploads/${sanitizedPath}`;
-                                window.open(`${baseUrl}${cleanPath}`, '_blank');
+                                window.open(`${baseUrl}${cleanPath}`, "_blank");
                               }}
                               className="p-2 text-scrutiq-muted hover:text-scrutiq-blue hover:bg-scrutiq-surface rounded-xl border border-transparent hover:border-scrutiq-border transition-all"
                               title="View Original PDF"

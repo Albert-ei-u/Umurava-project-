@@ -1,14 +1,21 @@
 "use client";
 
 import { useState } from "react";
-import { ShieldCheck, Mail, Lock, ArrowRight, RefreshCcw, Eye, EyeOff } from "lucide-react";
+import {
+  ShieldCheck,
+  Mail,
+  Lock,
+  ArrowRight,
+  RefreshCcw,
+  Eye,
+  EyeOff,
+} from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "@/lib/toast";
 import { motion } from "framer-motion";
 import { GoogleLogin } from "@react-oauth/google";
-
 
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
@@ -115,15 +122,14 @@ const LoginPage = () => {
                 </button>
               </div>
               <div className="flex justify-end pr-1">
-                <Link 
-                  href="/forgot-password" 
+                <Link
+                  href="/forgot-password"
                   className="text-[10px] font-black text-scrutiq-muted hover:text-scrutiq-blue uppercase tracking-widest transition-colors"
                 >
                   Forgot password?
                 </Link>
               </div>
             </div>
-
 
             <button
               type="submit"
@@ -142,8 +148,6 @@ const LoginPage = () => {
               )}
             </button>
           </form>
-
-
 
           <div className="mt-8 pt-8 border-t border-scrutiq-border/50 text-center">
             <p className="text-[10px] font-bold text-scrutiq-muted tracking-widest">

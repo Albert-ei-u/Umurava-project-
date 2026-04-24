@@ -266,12 +266,14 @@ const ChatPage = () => {
           <button
             onClick={handleClearChat}
             className={`flex items-center gap-2 px-3 py-1.5 text-[9px] font-bold rounded-lg transition-all uppercase tracking-widest ${
-              isConfirmingClear 
-                ? "bg-rose-500 text-white shadow-lg shadow-rose-500/20" 
+              isConfirmingClear
+                ? "bg-rose-500 text-white shadow-lg shadow-rose-500/20"
                 : "text-scrutiq-muted hover:text-rose-500 hover:bg-rose-50"
             }`}
           >
-            <Trash2 className={`size-3 ${isConfirmingClear ? "animate-bounce" : ""}`} />
+            <Trash2
+              className={`size-3 ${isConfirmingClear ? "animate-bounce" : ""}`}
+            />
             {isConfirmingClear ? "Confirm Clear?" : "Clear Memory"}
           </button>
         </div>
@@ -309,7 +311,6 @@ const ChatPage = () => {
                       msg.role === "user"
                         ? "bg-scrutiq-bg text-scrutiq-dark border-scrutiq-border rounded-tr-sm"
                         : "bg-scrutiq-surface text-scrutiq-dark border-scrutiq-border rounded-tl-sm"
-
                     }`}
                   >
                     <MarkdownLite text={msg.content} />
@@ -364,24 +365,35 @@ const ChatPage = () => {
               </button>
             </div>
             <div className="flex flex-wrap gap-4 mt-4 justify-center">
-              <button 
-                onClick={() => setInput("I want to screen candidates for a job. Please help me initiate the protocol.")}
+              <button
+                onClick={() =>
+                  setInput(
+                    "I want to screen candidates for a job. Please help me initiate the protocol.",
+                  )
+                }
                 className="flex items-center gap-1.5 text-[9px] font-black text-scrutiq-muted uppercase tracking-widest bg-scrutiq-bg px-2.5 py-1.5 rounded-md border border-scrutiq-border/50 hover:bg-scrutiq-blue/10 hover:text-scrutiq-blue hover:border-scrutiq-blue/30 transition-all active:scale-95"
               >
                 <ShieldCheck className="size-3 text-scrutiq-blue" /> Screen
                 Candidates
               </button>
-              <button 
-                onClick={() => setInput("List all active jobs from our registry.")}
+              <button
+                onClick={() =>
+                  setInput("List all active jobs from our registry.")
+                }
                 className="flex items-center gap-1.5 text-[9px] font-black text-scrutiq-muted uppercase tracking-widest bg-scrutiq-bg px-2.5 py-1.5 rounded-md border border-scrutiq-border/50 hover:bg-scrutiq-blue/10 hover:text-scrutiq-blue hover:border-scrutiq-blue/30 transition-all active:scale-95"
               >
                 <Briefcase className="size-3 text-scrutiq-blue" /> List Jobs
               </button>
-              <button 
-                onClick={() => setInput("I need to modify the judging criteria for a job posting.")}
+              <button
+                onClick={() =>
+                  setInput(
+                    "I need to modify the judging criteria for a job posting.",
+                  )
+                }
                 className="flex items-center gap-1.5 text-[9px] font-black text-scrutiq-muted uppercase tracking-widest bg-scrutiq-bg px-2.5 py-1.5 rounded-md border border-scrutiq-border/50 hover:bg-scrutiq-blue/10 hover:text-scrutiq-blue hover:border-scrutiq-blue/30 transition-all active:scale-95"
               >
-                <Activity className="size-3 text-scrutiq-blue" /> Modify Criteria
+                <Activity className="size-3 text-scrutiq-blue" /> Modify
+                Criteria
               </button>
             </div>
           </div>

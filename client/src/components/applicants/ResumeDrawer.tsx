@@ -2,7 +2,15 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, FileText, User, MapPin, Mail, Briefcase, ExternalLink } from "lucide-react";
+import {
+  X,
+  FileText,
+  User,
+  MapPin,
+  Mail,
+  Briefcase,
+  ExternalLink,
+} from "lucide-react";
 
 interface ResumeDrawerProps {
   candidate: any;
@@ -10,24 +18,32 @@ interface ResumeDrawerProps {
   onClose: () => void;
 }
 
-export default function ResumeDrawer({ candidate, isOpen, onClose }: ResumeDrawerProps) {
+export default function ResumeDrawer({
+  candidate,
+  isOpen,
+  onClose,
+}: ResumeDrawerProps) {
   if (!candidate) return null;
 
   const getResumeUrl = (url?: string) => {
     if (!url) return null;
     if (url.startsWith("http")) return url;
 
-    const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-    const baseUrl = rawApiUrl.split('/api')[0].replace(/\/$/, "");
-    
+    const rawApiUrl =
+      process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
+    const baseUrl = rawApiUrl.split("/api")[0].replace(/\/$/, "");
+
     // Robustly handle both old (uploads/resumes/...) and new (resumes/...) path formats
     const sanitizedPath = url.replace(/^(\/?uploads\/)/, "").replace(/^\//, "");
     const cleanPath = `/uploads/${sanitizedPath}`;
-    
+
     return `${baseUrl}${cleanPath}`;
   };
 
-  const resumeText = candidate["resuméText"] || candidate.technicalProfile || "No resume text available.";
+  const resumeText =
+    candidate["resuméText"] ||
+    candidate.technicalProfile ||
+    "No resume text available.";
   const fullResumeUrl = getResumeUrl(candidate.resumeUrl);
 
   return (
@@ -60,7 +76,9 @@ export default function ResumeDrawer({ candidate, isOpen, onClose }: ResumeDrawe
                   {candidate.name?.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <h2 className="text-lg font-black text-scrutiq-dark uppercase tracking-tight">{candidate.name}</h2>
+                  <h2 className="text-lg font-black text-scrutiq-dark uppercase tracking-tight">
+                    {candidate.name}
+                  </h2>
                   <div className="flex items-center gap-3 mt-1 flex-wrap">
                     <span className="flex items-center gap-1 text-[10px] font-bold text-scrutiq-muted uppercase tracking-widest">
                       <Briefcase className="size-3" /> {candidate.role}
@@ -71,11 +89,12 @@ export default function ResumeDrawer({ candidate, isOpen, onClose }: ResumeDrawe
                       </span>
                     )}
                   </div>
-                  {candidate.email && !candidate.email.includes("@registry.extern") && (
-                    <span className="flex items-center gap-1 text-[10px] font-bold text-scrutiq-blue mt-1">
-                      <Mail className="size-3" /> {candidate.email}
-                    </span>
-                  )}
+                  {candidate.email &&
+                    !candidate.email.includes("@registry.extern") && (
+                      <span className="flex items-center gap-1 text-[10px] font-bold text-scrutiq-blue mt-1">
+                        <Mail className="size-3" /> {candidate.email}
+                      </span>
+                    )}
                 </div>
               </div>
               <button
@@ -91,10 +110,12 @@ export default function ResumeDrawer({ candidate, isOpen, onClose }: ResumeDrawe
               <div className="flex items-center justify-between border-b border-scrutiq-border/50 pb-3">
                 <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-scrutiq-muted">
                   <FileText className="size-4 text-scrutiq-blue" />
-                  {candidate.resumeUrl ? "Primary CV Document" : "Extracted CV Text"}
+                  {candidate.resumeUrl
+                    ? "Primary CV Document"
+                    : "Extracted CV Text"}
                 </div>
                 {fullResumeUrl && (
-                  <a 
+                  <a
                     href={fullResumeUrl}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -108,8 +129,12 @@ export default function ResumeDrawer({ candidate, isOpen, onClose }: ResumeDrawe
 
               {fullResumeUrl ? (
                 <div className="h-[600px] w-full rounded-2xl border border-scrutiq-border/50 overflow-hidden bg-scrutiq-bg">
-                  <iframe 
-                    src={fullResumeUrl.includes("google.com/document") ? fullResumeUrl : `${fullResumeUrl}#toolbar=0`}
+                  <iframe
+                    src={
+                      fullResumeUrl.includes("google.com/document")
+                        ? fullResumeUrl
+                        : `${fullResumeUrl}#toolbar=0`
+                    }
                     className="w-full h-full border-none"
                     title="Resume Preview"
                   />

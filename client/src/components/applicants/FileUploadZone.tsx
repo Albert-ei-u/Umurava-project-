@@ -29,7 +29,12 @@ export default function FileUploadZone() {
     accept: {
       "text/csv": [".csv"],
       "application/pdf": [".pdf"],
-      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [".xlsx"],
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
+        ".xlsx",
+      ],
+      "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
+        [".docx"],
+      "application/msword": [".doc"],
     },
   });
 
@@ -39,7 +44,7 @@ export default function FileUploadZone() {
 
   const handleUpload = async () => {
     if (files.length === 0) return;
-    
+
     setIsUploading(true);
     // Simulate upload progress
     const interval = setInterval(() => {
@@ -68,7 +73,9 @@ export default function FileUploadZone() {
       <div
         {...getRootProps()}
         className={`relative glass-card border-2 border-dashed p-12 transition-all cursor-pointer text-center group ${
-          isDragActive ? "border-brand-indigo bg-brand-indigo/5 scale-[0.99]" : "border-white/10 hover:border-brand-indigo/50 hover:bg-scrutiq-surface/[0.02]"
+          isDragActive
+            ? "border-brand-indigo bg-brand-indigo/5 scale-[0.99]"
+            : "border-white/10 hover:border-brand-indigo/50 hover:bg-scrutiq-surface/[0.02]"
         }`}
       >
         <input {...getInputProps()} />
@@ -77,9 +84,15 @@ export default function FileUploadZone() {
             <FontAwesomeIcon icon={faCloudArrowUp} size="2x" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-xl font-bold text-white">Drag and drop candidate files</h3>
+            <h3 className="text-xl font-bold text-white">
+              Drag and drop candidate files
+            </h3>
             <p className="text-gray-400 text-sm">
-              Support for <span className="text-white font-medium">CSV, Excel (XLSX), and PDF</span> resumes.
+              Support for{" "}
+              <span className="text-white font-medium">
+                CSV, Excel (XLSX), DOCX and PDF
+              </span>{" "}
+              resumes.
             </p>
           </div>
           <div className="flex items-center gap-3 mt-2">
@@ -108,7 +121,9 @@ export default function FileUploadZone() {
             className="glass-card p-6 space-y-4"
           >
             <div className="flex items-center justify-between">
-              <h4 className="font-bold text-white">Files to Import ({files.length})</h4>
+              <h4 className="font-bold text-white">
+                Files to Import ({files.length})
+              </h4>
               <button
                 onClick={() => setFiles([])}
                 className="text-xs text-rose-400 hover:underline font-bold"
@@ -128,11 +143,19 @@ export default function FileUploadZone() {
                   <div className="flex items-center gap-3 overflow-hidden">
                     <FontAwesomeIcon
                       icon={getFileIcon(file.name)}
-                      className={file.name.endsWith(".pdf") ? "text-rose-400" : "text-emerald-400"}
+                      className={
+                        file.name.endsWith(".pdf")
+                          ? "text-rose-400"
+                          : "text-emerald-400"
+                      }
                     />
                     <div className="flex flex-col overflow-hidden">
-                      <span className="text-xs font-bold text-white truncate">{file.name}</span>
-                      <span className="text-[10px] text-gray-500">{(file.size / 1024).toFixed(1)} KB</span>
+                      <span className="text-xs font-bold text-white truncate">
+                        {file.name}
+                      </span>
+                      <span className="text-[10px] text-gray-500">
+                        {(file.size / 1024).toFixed(1)} KB
+                      </span>
                     </div>
                   </div>
                   <button
@@ -167,11 +190,16 @@ export default function FileUploadZone() {
                 onClick={handleUpload}
                 disabled={isUploading}
                 className={`px-8 py-3 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg ${
-                  isUploading ? "bg-scrutiq-surface/10 text-gray-500 cursor-not-allowed" : "bg-brand-indigo hover:bg-brand-indigo/90 text-white shadow-brand-indigo/25"
+                  isUploading
+                    ? "bg-scrutiq-surface/10 text-gray-500 cursor-not-allowed"
+                    : "bg-brand-indigo hover:bg-brand-indigo/90 text-white shadow-brand-indigo/25"
                 }`}
               >
                 {isUploading ? (
-                  <FontAwesomeIcon icon={faCloudArrowUp} className="animate-bounce" />
+                  <FontAwesomeIcon
+                    icon={faCloudArrowUp}
+                    className="animate-bounce"
+                  />
                 ) : (
                   <FontAwesomeIcon icon={faCheckCircle} />
                 )}

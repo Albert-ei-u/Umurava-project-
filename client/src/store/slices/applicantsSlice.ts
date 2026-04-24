@@ -12,6 +12,7 @@ export interface Applicant {
   source: "Umurava" | "External";
   status: "Pending" | "Screened" | "Shortlisted" | "Rejected";
   appliedAt: string;
+  isAiGenerated?: boolean;
 }
 
 interface ApplicantsState {
@@ -43,8 +44,11 @@ const applicantsSlice = createSlice({
         applicant.status = action.payload.score > 70 ? "Shortlisted" : "Screened";
       }
     },
+    removeApplicants: (state, action: PayloadAction<string[]>) => {
+      state.items = state.items.filter((item) => !action.payload.includes(item.id));
+    },
   },
 });
 
-export const { setApplicants, addApplicant, updateApplicantScore } = applicantsSlice.actions;
+export const { setApplicants, addApplicant, updateApplicantScore, removeApplicants } = applicantsSlice.actions;
 export default applicantsSlice.reducer;

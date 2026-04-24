@@ -15,6 +15,9 @@ router.get("/", applicantsController.getAll);
 // Profile Detail Retrieval
 router.get("/:id", applicantsController.getById);
 
+// Bulk Remove Profiles
+router.delete("/bulk", applicantsController.deleteBulk);
+
 // Remove Profile
 router.delete("/:id", applicantsController.delete);
 

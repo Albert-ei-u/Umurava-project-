@@ -35,14 +35,20 @@ const Sidebar = ({ onClose }: SidebarProps) => {
 
       // Background Sync: If branding is missing, repair the session silently
       if (!parsed.profilePic && parsed.id) {
-        api.get(`/auth/profile/${parsed.id}`).then((res) => {
-          if (res.data.status === "success") {
-            const updated = { ...parsed, profilePic: res.data.data.profilePic };
-            localStorage.setItem("user", JSON.stringify(updated));
-            setUser(updated);
-            window.dispatchEvent(new CustomEvent("user-profile-updated"));
-          }
-        }).catch(() => {});
+        api
+          .get(`/auth/profile/${parsed.id}`)
+          .then((res) => {
+            if (res.data.status === "success") {
+              const updated = {
+                ...parsed,
+                profilePic: res.data.data.profilePic,
+              };
+              localStorage.setItem("user", JSON.stringify(updated));
+              setUser(updated);
+              window.dispatchEvent(new CustomEvent("user-profile-updated"));
+            }
+          })
+          .catch(() => {});
       }
     }
 
@@ -55,7 +61,6 @@ const Sidebar = ({ onClose }: SidebarProps) => {
       }
     };
 
-
     window.addEventListener("user-profile-updated", handleProfileSync);
 
     const timer = setInterval(() => {
@@ -64,7 +69,7 @@ const Sidebar = ({ onClose }: SidebarProps) => {
         `${now.getHours()}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`,
       );
     }, 5000);
-    
+
     return () => {
       clearInterval(timer);
       window.removeEventListener("user-profile-updated", handleProfileSync);
