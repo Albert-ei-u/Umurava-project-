@@ -253,7 +253,7 @@ If you discover a security vulnerability, please read [SECURITY.md](SECURITY.md)
 
 ## License
 
-Licensed under the **ISC License**. See the [LICENSE](LICENSE) file for details.
+Licensed under the **ISC License**. See the [LICENSE](LICENSE.md) file for details.
 
 ---
 
