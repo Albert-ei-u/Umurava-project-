@@ -73,9 +73,9 @@ export default function LandingPage() {
 
           <div className="space-y-6">
             <h1 className="text-4xl sm:text-6xl md:text-8xl font-black text-scrutiq-dark tracking-tighter leading-[0.95] md:leading-[0.9] max-w-4xl mx-auto">
-              Hire smarter with <br />
+              Effortless Hiring <br />
               <span className="text-scrutiq-blue relative">
-                AI Precision
+                Powered by AI
                 <svg
                   className="absolute -bottom-2 left-0 w-full h-3 text-scrutiq-blue/20"
                   viewBox="0 0 100 10"
