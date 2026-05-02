@@ -3,7 +3,8 @@ import { Plus_Jakarta_Sans } from "next/font/google";
 import "../styles/globals.css";
 import { Toaster } from "sonner";
 import Providers from "@/components/Providers";
-import {Analytics} from "@vercel/analytics/react"
+import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const jakarta = Plus_Jakarta_Sans({ 
   subsets: ["latin"], 
@@ -41,6 +42,7 @@ export default function RootLayout({
           />
 
         </Providers>
+        <SpeedInsights />
         <Analytics />
       </body>
     </html>
