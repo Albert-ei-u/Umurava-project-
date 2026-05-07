@@ -115,14 +115,18 @@ class AuthController {
     try {
       const { email: rawEmail, password } = req.body;
       const email = rawEmail?.toLowerCase()?.trim();
+      console.log(`[AUTH DEBUG] Login attempt for email: "${email}"`);
 
       const user = await authService.findUserByEmail(email);
 
       if (!user) {
+        console.log(`[AUTH DEBUG] User not found for email: "${email}"`);
         return res
           .status(401)
           .json({ status: "fault", message: "Invalid credentials." });
       }
+
+      console.log(`[AUTH DEBUG] User found. isVerified: ${user.isVerified}`);
 
       if (!user.isVerified) {
         return res.status(401).json({
@@ -135,7 +139,10 @@ class AuthController {
         password,
         user.passwordHash,
       );
+      console.log(`[AUTH DEBUG] Password match result: ${isMatch}`);
+
       if (!isMatch) {
+        console.log(`[AUTH DEBUG] Password mismatch for user: ${email}`);
         return res
           .status(401)
           .json({ status: "fault", message: "Invalid credentials." });
