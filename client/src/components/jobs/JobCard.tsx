@@ -36,7 +36,13 @@ interface JobCardProps {
   viewMode?: "grid" | "list";
 }
 
-const JobCard = ({ job, index, onRefresh, onEdit, viewMode = "grid" }: JobCardProps) => {
+const JobCard = ({
+  job,
+  index,
+  onRefresh,
+  onEdit,
+  viewMode = "grid",
+}: JobCardProps) => {
   const router = useRouter();
   const [showActions, setShowActions] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -58,7 +64,9 @@ const JobCard = ({ job, index, onRefresh, onEdit, viewMode = "grid" }: JobCardPr
   const actions = [
     { label: "Edit job", icon: Edit3, color: "text-scrutiq-muted" },
     { label: "View details", icon: ExternalLink, color: "text-scrutiq-blue" },
-    job.status === "Archived" ? { label: "Restore job", icon: Briefcase, color: "text-emerald-500" } : { label: "Archive job", icon: Archive, color: "text-amber-500" },
+    job.status === "Archived"
+      ? { label: "Restore job", icon: Briefcase, color: "text-emerald-500" }
+      : { label: "Archive job", icon: Archive, color: "text-amber-500" },
     { label: "Delete job", icon: Trash2, color: "text-rose-500" },
   ];
 
@@ -77,7 +85,12 @@ const JobCard = ({ job, index, onRefresh, onEdit, viewMode = "grid" }: JobCardPr
     }
 
     if (label === "Archive job") {
-      if (!confirm("Are you sure you want to archive this job? It will not be available for screening.")) return;
+      if (
+        !confirm(
+          "Are you sure you want to archive this job? It will not be available for screening.",
+        )
+      )
+        return;
       setIsProcessing(true);
       try {
         await api.put(`/jobs/${jobId}`, { status: "Archived" });
@@ -129,7 +142,7 @@ const JobCard = ({ job, index, onRefresh, onEdit, viewMode = "grid" }: JobCardPr
         <div className="size-10 rounded-xl bg-scrutiq-blue/5 border border-scrutiq-blue/10 flex items-center justify-center group-hover:bg-scrutiq-blue transition-all shrink-0">
           <Briefcase className="size-5 text-scrutiq-blue group-hover:text-white transition-colors" />
         </div>
-        
+
         <div className="flex-1 min-w-0">
           <h3 className="text-sm font-black text-scrutiq-dark tracking-tight group-hover:text-scrutiq-blue transition-colors truncate">
             {job.title}
@@ -141,19 +154,27 @@ const JobCard = ({ job, index, onRefresh, onEdit, viewMode = "grid" }: JobCardPr
 
         <div className="hidden md:flex items-center gap-6">
           <div className="flex items-center gap-2 text-scrutiq-muted min-w-[120px]">
-             <MapPin className="size-3" />
-             <span className="text-[10px] font-bold tracking-widest">{job.location}</span>
+            <MapPin className="size-3" />
+            <span className="text-[10px] font-bold tracking-widest">
+              {job.location}
+            </span>
           </div>
           <div className="flex items-center gap-2 text-scrutiq-muted min-w-[100px]">
-             <Users className="size-3" />
-             <span className="text-[10px] font-bold tracking-widest">{job.applicantsCount} profiles</span>
+            <Users className="size-3" />
+            <span className="text-[10px] font-bold tracking-widest">
+              {job.applicantsCount} profiles
+            </span>
           </div>
         </div>
 
         <div className="flex items-center gap-4">
-          <span className={`px-2.5 py-1 rounded-lg text-[9px] font-bold tracking-wider border flex items-center gap-1.5 ${
-            job.status === "Closed" || job.status === "Archived" ? "bg-rose-50 text-rose-600 border-rose-100" : "bg-emerald-50 text-emerald-600 border-emerald-100"
-          }`}>
+          <span
+            className={`px-2.5 py-1 rounded-lg text-[9px] font-bold tracking-wider border flex items-center gap-1.5 ${
+              job.status === "Closed" || job.status === "Archived"
+                ? "bg-rose-50 text-rose-600 border-rose-100"
+                : "bg-emerald-50 text-emerald-600 border-emerald-100"
+            }`}
+          >
             {job.status}
           </span>
           <div className="relative" ref={actionsRef}>

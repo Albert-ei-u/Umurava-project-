@@ -112,6 +112,20 @@ class ApplicantsController {
     }
   }
 
+  async deleteBulk(req: Request, res: Response) {
+    try {
+      const { ids } = req.body;
+      if (!ids || !Array.isArray(ids)) {
+        return res.status(400).json({ status: "fault", message: "IDs array required for bulk delete." });
+      }
+
+      await applicantsService.deleteApplicantsBulk(ids);
+      return res.status(200).json({ status: "success", message: `${ids.length} profiles removed.` });
+    } catch (error: any) {
+      return res.status(500).json({ status: "fault", message: error.message });
+    }
+  }
+
   async sendEmail(req: Request, res: Response) {
     try {
       const { id } = req.params;

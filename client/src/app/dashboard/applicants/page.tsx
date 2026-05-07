@@ -49,6 +49,8 @@ const ApplicantsPage = () => {
   const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
   const [sortOrder, setSortOrder] = useState<"none" | "asc" | "desc">("none");
   const [filterScope, setFilterScope] = useState<"all" | "duplicates">("all");
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
 
   const handleResolveDuplicate = async (
     id: string,
@@ -58,7 +60,19 @@ const ApplicantsPage = () => {
       await api.post(`/applicants/${id}/resolve-duplicate`, { action });
       notify("Duplicate conflict resolved.", "success");
       setIsDuplicateModalOpen(false);
-      fetchCandidates();
+
+      // Refresh the registry
+      const response = await api.get("/applicants");
+      const updatedCandidates = response.data.data;
+      setCandidates(updatedCandidates);
+
+      // If we were in duplicates view and no more duplicates exist, return to all view
+      const remainingDuplicates = updatedCandidates.filter(
+        (c: any) => c.isDuplicate,
+      ).length;
+      if (filterScope === "duplicates" && remainingDuplicates === 0) {
+        setFilterScope("all");
+      }
     } catch (error) {
       notify("Failed to resolve duplicate conflict.", "error");
     }
@@ -107,6 +121,42 @@ const ApplicantsPage = () => {
       } catch (error) {
         notify("Failed to remove profile.", "error");
       }
+    }
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedIds.length === filteredCandidates.length) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(filteredCandidates.map((c) => c._id));
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
+    );
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedIds.length === 0) return;
+    if (
+      !window.confirm(
+        `Are you sure you want to remove ${selectedIds.length} profiles from the registry?`,
+      )
+    )
+      return;
+
+    setIsBulkDeleting(true);
+    try {
+      await api.delete("/applicants/bulk", { data: { ids: selectedIds } });
+      notify(`${selectedIds.length} profiles removed successfully.`, "success");
+      setSelectedIds([]);
+      fetchCandidates();
+    } catch (error) {
+      notify("Failed to remove profiles.", "error");
+    } finally {
+      setIsBulkDeleting(false);
     }
   };
 
@@ -166,7 +216,11 @@ const ApplicantsPage = () => {
       if (rowNumber > 1) {
         row.eachCell((cell) => {
           cell.font = { name: "Poppins", size: 10 };
-          cell.alignment = { vertical: "middle", horizontal: "left", wrapText: true };
+          cell.alignment = {
+            vertical: "middle",
+            horizontal: "left",
+            wrapText: true,
+          };
           cell.border = {
             top: { style: "thin" },
             left: { style: "thin" },
@@ -216,7 +270,9 @@ const ApplicantsPage = () => {
     // Write to buffer and download
 
     const buffer = await workbook.xlsx.writeBuffer();
-    const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+    const blob = new Blob([buffer], {
+      type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    });
     const link = document.createElement("a");
     const url = URL.createObjectURL(blob);
     link.href = url;
@@ -224,10 +280,9 @@ const ApplicantsPage = () => {
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    
+
     notify("Talent ledger synchronized and exported.", "success");
   };
-
 
   const filteredCandidates = candidates
     .filter(
@@ -237,16 +292,20 @@ const ApplicantsPage = () => {
     )
     .filter((app) => {
       const search = searchTerm.toLowerCase();
+      const name = (app.name || "").toLowerCase();
+      const email = (app.email || "").toLowerCase();
+      const role = (app.role || "").toLowerCase();
+
       return (
-        app.name.toLowerCase().includes(search) ||
-        (app.email || "").toLowerCase().includes(search) ||
-        (app.role || "").toLowerCase().includes(search)
+        name.includes(search) || email.includes(search) || role.includes(search)
       );
     })
     .sort((a, b) => {
       if (sortOrder === "none") return 0;
-      if (sortOrder === "asc") return a.name.localeCompare(b.name);
-      return b.name.localeCompare(a.name);
+      const nameA = (a.name || "").toLowerCase();
+      const nameB = (b.name || "").toLowerCase();
+      if (sortOrder === "asc") return nameA.localeCompare(nameB);
+      return nameB.localeCompare(nameA);
     });
 
   if (isLoading) {
@@ -368,6 +427,21 @@ const ApplicantsPage = () => {
                   : "Z-A"}
             </span>
           </button>
+
+          {selectedIds.length > 0 && (
+            <motion.button
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              onClick={handleBulkDelete}
+              disabled={isBulkDeleting}
+              className="flex items-center gap-2 px-6 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-lg shadow-rose-500/20 disabled:opacity-50"
+            >
+              <Trash2 className="size-3.5" />
+              {isBulkDeleting
+                ? "Removing..."
+                : `Delete ${selectedIds.length} Selected`}
+            </motion.button>
+          )}
         </div>
         <button
           onClick={fetchCandidates}
@@ -382,6 +456,19 @@ const ApplicantsPage = () => {
           <table className="w-full text-left">
             <thead>
               <tr className="bg-scrutiq-bg text-[10px] font-bold text-scrutiq-muted tracking-widest border-b border-scrutiq-border/50">
+                <th className="px-6 py-5 w-10">
+                  <div className="flex items-center justify-center">
+                    <input
+                      type="checkbox"
+                      checked={
+                        selectedIds.length === filteredCandidates.length &&
+                        filteredCandidates.length > 0
+                      }
+                      onChange={toggleSelectAll}
+                      className="size-4 rounded border-scrutiq-border text-scrutiq-blue focus:ring-scrutiq-blue transition-all cursor-pointer"
+                    />
+                  </div>
+                </th>
                 <th className="px-6 py-5">Applicant</th>
                 <th className="px-6 py-5">Gender</th>
                 <th className="px-6 py-5">Experience</th>
@@ -393,8 +480,18 @@ const ApplicantsPage = () => {
               {filteredCandidates.map((app) => (
                 <tr
                   key={app._id}
-                  className="hover:bg-scrutiq-bg/30 transition-all group"
+                  className={`hover:bg-scrutiq-bg/30 transition-all group ${selectedIds.includes(app._id) ? "bg-scrutiq-blue/5" : ""}`}
                 >
+                  <td className="px-6 py-6">
+                    <div className="flex items-center justify-center">
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(app._id)}
+                        onChange={() => toggleSelect(app._id)}
+                        className="size-4 rounded border-scrutiq-border text-scrutiq-blue focus:ring-scrutiq-blue transition-all cursor-pointer"
+                      />
+                    </div>
+                  </td>
                   <td className="px-6 py-6 font-jakarta">
                     <div className="flex items-center gap-4">
                       <div className="size-11 rounded-xl bg-scrutiq-blue/5 border border-scrutiq-blue/10 flex items-center justify-center font-bold text-scrutiq-blue group-hover:bg-scrutiq-blue group-hover:text-white transition-all shadow-sm">
@@ -402,12 +499,13 @@ const ApplicantsPage = () => {
                       </div>
                       <div className="space-y-0.5">
                         <p className="text-sm font-black text-scrutiq-dark tracking-tight">
-                          {app.name
+                          {(app.name || "Anonymous")
                             .split(" ")
-                            .map(
-                              (w: string) =>
-                                w.charAt(0).toUpperCase() +
-                                w.slice(1).toLowerCase(),
+                            .map((w: string) =>
+                              w.length > 0
+                                ? w.charAt(0).toUpperCase() +
+                                  w.slice(1).toLowerCase()
+                                : "",
                             )
                             .join(" ")}
                         </p>
@@ -421,7 +519,6 @@ const ApplicantsPage = () => {
                     {app.gender || "Not stated"}
                   </td>
                   <td className="px-6 py-6">
-
                     <div className="flex items-center gap-2 text-scrutiq-muted font-bold text-[10px] uppercase tracking-widest">
                       <MapPin className="size-3.5" />
                       {app.experience}
@@ -475,23 +572,34 @@ const ApplicantsPage = () => {
                       <button
                         onClick={() => {
                           setSelectedCandidate(app);
-                          if (app.resumeUrl) {
-                            const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-                            const baseUrl = rawApiUrl.split('/api')[0].replace(/\/$/, "");
+                          if (app.resumeUrl && !app.isAiGenerated) {
+                            const rawApiUrl =
+                              process.env.NEXT_PUBLIC_API_URL ||
+                              "http://localhost:5000/api";
+                            const baseUrl = rawApiUrl
+                              .split("/api")[0]
+                              .replace(/\/$/, "");
                             const url = app.resumeUrl;
                             if (url.startsWith("http")) {
-                              window.open(url, '_blank');
+                              window.open(url, "_blank");
                               return;
                             }
-                            const sanitizedPath = url.replace(/^(\/?uploads\/)/, "").replace(/^\//, "");
+                            const sanitizedPath = url
+                              .replace(/^(\/?uploads\/)/, "")
+                              .replace(/^\//, "");
                             const cleanPath = `/uploads/${sanitizedPath}`;
-                            window.open(`${baseUrl}${cleanPath}`, '_blank');
+                            window.open(`${baseUrl}${cleanPath}`, "_blank");
                           } else {
                             setIsResumeOpen(true);
                           }
                         }}
-                        className="p-2 text-scrutiq-muted hover:text-scrutiq-blue hover:bg-scrutiq-surface rounded-xl border border-transparent hover:border-scrutiq-border transition-all"
-                        title="View Resume"
+                        disabled={app.isAiGenerated}
+                        className={`p-2 rounded-xl border transition-all ${app.isAiGenerated ? "text-scrutiq-muted/30 border-transparent cursor-not-allowed" : "text-scrutiq-muted hover:text-scrutiq-blue hover:bg-scrutiq-surface border-transparent hover:border-scrutiq-border"}`}
+                        title={
+                          app.isAiGenerated
+                            ? "No Original Document (AI Generated)"
+                            : "View Resume"
+                        }
                       >
                         <Eye className="size-4" />
                       </button>

@@ -87,7 +87,7 @@ const JobsPage = () => {
         </button>
       </div>
 
-    <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-1">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 px-1">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
           <div className="relative group flex items-center bg-scrutiq-surface border border-scrutiq-border rounded-xl px-4 py-2.5 w-full sm:w-80 focus-within:border-scrutiq-blue focus-within:ring-4 focus-within:ring-scrutiq-blue/5 transition-all">
             <Search className="size-4 text-scrutiq-muted group-focus-within:text-scrutiq-blue" />

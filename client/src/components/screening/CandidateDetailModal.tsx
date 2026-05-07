@@ -131,7 +131,9 @@ const CandidateDetailModal = ({
                         </div>
                       ))
                     ) : (
-                      <p className="text-[10px] font-bold text-scrutiq-muted/50 uppercase italic">No specific strengths noted</p>
+                      <p className="text-[10px] font-bold text-scrutiq-muted/50 uppercase italic">
+                        No specific strengths noted
+                      </p>
                     )}
                   </div>
                 </div>
@@ -144,17 +146,22 @@ const CandidateDetailModal = ({
                     </h3>
                   </div>
                   <div className="space-y-2">
-                    {(result.weaknesses || (result as any).gaps || []).length > 0 ? (
-                      (result.weaknesses || (result as any).gaps || []).map((weakness, i) => (
-                        <div key={i} className="flex items-start gap-2 group">
-                          <div className="size-1.5 rounded-full bg-rose-500 mt-1.5 shrink-0 group-hover:scale-125 transition-transform" />
-                          <p className="text-[11px] font-bold text-scrutiq-muted leading-tight uppercase tracking-tight">
-                            {weakness}
-                          </p>
-                        </div>
-                      ))
+                    {(result.weaknesses || (result as any).gaps || []).length >
+                    0 ? (
+                      (result.weaknesses || (result as any).gaps || []).map(
+                        (weakness, i) => (
+                          <div key={i} className="flex items-start gap-2 group">
+                            <div className="size-1.5 rounded-full bg-rose-500 mt-1.5 shrink-0 group-hover:scale-125 transition-transform" />
+                            <p className="text-[11px] font-bold text-scrutiq-muted leading-tight uppercase tracking-tight">
+                              {weakness}
+                            </p>
+                          </div>
+                        ),
+                      )
                     ) : (
-                      <p className="text-[10px] font-bold text-scrutiq-muted/50 uppercase italic">No critical weaknesses identified</p>
+                      <p className="text-[10px] font-bold text-scrutiq-muted/50 uppercase italic">
+                        No critical weaknesses identified
+                      </p>
                     )}
                   </div>
                 </div>
@@ -163,18 +170,24 @@ const CandidateDetailModal = ({
 
             <div className="p-8 border-t border-scrutiq-border/50 bg-scrutiq-bg/30 flex justify-end gap-4">
               {(result as any).candidateResume && (
-                <button 
+                <button
                   onClick={() => {
-                    const rawApiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api";
-                    const baseUrl = rawApiUrl.split('/api')[0].replace(/\/$/, "");
+                    const rawApiUrl =
+                      process.env.NEXT_PUBLIC_API_URL ||
+                      "http://localhost:5000/api";
+                    const baseUrl = rawApiUrl
+                      .split("/api")[0]
+                      .replace(/\/$/, "");
                     const url = (result as any).candidateResume;
                     if (url.startsWith("http")) {
-                       window.open(url, '_blank');
-                       return;
+                      window.open(url, "_blank");
+                      return;
                     }
-                    const sanitizedPath = url.replace(/^(\/?uploads\/)/, "").replace(/^\//, "");
+                    const sanitizedPath = url
+                      .replace(/^(\/?uploads\/)/, "")
+                      .replace(/^\//, "");
                     const cleanPath = `/uploads/${sanitizedPath}`;
-                    window.open(`${baseUrl}${cleanPath}`, '_blank');
+                    window.open(`${baseUrl}${cleanPath}`, "_blank");
                   }}
                   className="btn-secondary flex items-center gap-2"
                 >

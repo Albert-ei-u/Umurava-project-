@@ -48,10 +48,13 @@ app.options("*", cors());
 app.use(express.json({ limit: "50mb" }));
 app.use(express.urlencoded({ extended: true, limit: "50mb" }));
 app.use("/uploads", (req, res, next) => {
-  // Force PDF content type for resumes to ensure in-browser previewing for all files (including legacy .0 files)
+  // Only force PDF content type for .pdf files or files without extensions (legacy resumes)
   if (req.path.includes("/resumes/")) {
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", "inline");
+    const ext = req.path.split(".").pop()?.toLowerCase();
+    if (ext === "pdf" || !req.path.includes(".")) {
+      res.setHeader("Content-Type", "application/pdf");
+      res.setHeader("Content-Disposition", "inline");
+    }
   }
   next();
 }, express.static("uploads"));

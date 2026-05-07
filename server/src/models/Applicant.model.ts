@@ -14,6 +14,7 @@ export interface IApplicant extends Document {
   resumeUrl?: string;
   profileStatus: "Verified" | "Pending" | "Archived" | "Duplicate";
   isDuplicate: boolean;
+  isAiGenerated: boolean;
   originalCandidateId?: string;
   similarityScore?: number;
   ownerId: string;
@@ -93,6 +94,7 @@ const ApplicantSchema: Schema = new Schema(
     resumeUrl: { type: String },
     profileStatus: { type: String, enum: ["Verified", "Pending", "Archived", "Duplicate"], default: "Pending" },
     isDuplicate: { type: Boolean, default: false },
+    isAiGenerated: { type: Boolean, default: false },
     originalCandidateId: { type: Schema.Types.ObjectId, ref: "Applicant" },
     similarityScore: { type: Number, default: 0 },
     ownerId: { type: String, required: true },
