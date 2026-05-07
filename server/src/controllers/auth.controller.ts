@@ -38,7 +38,8 @@ class AuthController {
 
   async register(req: Request, res: Response) {
     try {
-      const { fullName, email, password, companyName } = req.body;
+      const { fullName, email: rawEmail, password, companyName } = req.body;
+      const email = rawEmail?.toLowerCase()?.trim();
 
       if (!fullName || !email || !password || !companyName) {
         return res
@@ -112,15 +113,20 @@ class AuthController {
 
   async login(req: Request, res: Response) {
     try {
-      const { email, password } = req.body;
+      const { email: rawEmail, password } = req.body;
+      const email = rawEmail?.toLowerCase()?.trim();
+      console.log(`[AUTH DEBUG] Login attempt for email: "${email}"`);
 
       const user = await authService.findUserByEmail(email);
 
       if (!user) {
+        console.log(`[AUTH DEBUG] User not found for email: "${email}"`);
         return res
           .status(401)
           .json({ status: "fault", message: "Invalid credentials." });
       }
+
+      console.log(`[AUTH DEBUG] User found. isVerified: ${user.isVerified}`);
 
       if (!user.isVerified) {
         return res.status(401).json({
@@ -133,7 +139,10 @@ class AuthController {
         password,
         user.passwordHash,
       );
+      console.log(`[AUTH DEBUG] Password match result: ${isMatch}`);
+
       if (!isMatch) {
+        console.log(`[AUTH DEBUG] Password mismatch for user: ${email}`);
         return res
           .status(401)
           .json({ status: "fault", message: "Invalid credentials." });
@@ -331,7 +340,8 @@ class AuthController {
 
   async forgotPassword(req: Request, res: Response) {
     try {
-      const { email } = req.body;
+      const { email: rawEmail } = req.body;
+      const email = rawEmail?.toLowerCase()?.trim();
       if (!email)
         return res
           .status(400)
@@ -360,7 +370,8 @@ class AuthController {
 
   async verifyResetPin(req: Request, res: Response) {
     try {
-      const { email, pin } = req.body;
+      const { email: rawEmail, pin } = req.body;
+      const email = rawEmail?.toLowerCase()?.trim();
       if (!email || !pin)
         return res
           .status(400)
@@ -393,7 +404,8 @@ class AuthController {
 
   async resetPassword(req: Request, res: Response) {
     try {
-      const { email, pin, password, fullName, companyName } = req.body;
+      const { email: rawEmail, pin, password, fullName, companyName } = req.body;
+      const email = rawEmail?.toLowerCase()?.trim();
       if (!email || !pin || !password) {
         return res.status(400).json({
           status: "fault",

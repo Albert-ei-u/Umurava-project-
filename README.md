@@ -2,7 +2,7 @@
 
 <br />
 
-```
+```text
  ███████╗ ██████╗██████╗ ██╗   ██╗████████╗██╗ ██████╗
  ██╔════╝██╔════╝██╔══██╗██║   ██║╚══██╔══╝██║██╔═══██╗
  ███████╗██║     ██████╔╝██║   ██║   ██║   ██║██║   ██║
@@ -42,6 +42,8 @@ Built as part of the **Umurava 2026** challenge.
 ## Table of Contents
 
 - [Features](#features)
+- [System Architecture](#system-architecture)
+- [AI Decision Flow](#ai-decision-flow)
 - [Tech Stack](#tech-stack)
 - [Project Structure](#project-structure)
 - [Getting Started](#getting-started)
@@ -61,6 +63,68 @@ Built as part of the **Umurava 2026** challenge.
 - **Email Notifications** — Automated emails notify applicants and recruiters at key stages.
 - **Secure Auth** — JWT-based authentication for recruiter accounts.
 - **Fully Responsive** — Works seamlessly on desktop, tablet, and mobile.
+
+---
+
+## 🏗️ System Architecture
+
+Scrutiq follows a modern full-stack architecture designed for scalability and isolation.
+
+```mermaid
+graph TD
+    subgraph Frontend [Next.js Dashboard]
+        UI[Recruiter UI]
+        Redux[Redux Toolkit State]
+        UI --> Redux
+    end
+
+    subgraph Backend [Node.js + TypeScript]
+        API[REST API Layer]
+        Jobs[Jobs Service]
+        AppSvc[Applicants Service]
+        ScreenSvc[Screening Service]
+        GeminiSvc[Gemini AI Service]
+        
+        API --> Jobs
+        API --> AppSvc
+        API --> ScreenSvc
+        ScreenSvc --> GeminiSvc
+        AppSvc --> GeminiSvc
+    end
+
+    subgraph Data [Persistence Layer]
+        DB[(MongoDB Atlas)]
+        Storage[Local/Cloud Resume Storage]
+    end
+
+    Redux --> API
+    Jobs --> DB
+    AppSvc --> DB
+    AppSvc --> Storage
+    ScreenSvc --> DB
+```
+
+---
+
+## 🤖 AI Decision Flow
+
+The AI logic in Scrutiq is split into two critical phases: **Extraction** and **Screening**.
+
+### 1. Profile Extraction (Unstructured to Structured)
+When a resume (PDF/Word) is uploaded, the system:
+- Extracts raw text using `pdf-parse` or `mammoth`.
+- Sends the text to Gemini with a specialized prompt to populate the **Umurava Talent Profile Schema**.
+- Identifies semantic duplicates to prevent profile stagnation.
+
+### 2. Technical Screening (Ranking & Scoring)
+During the screening phase, the AI evaluates candidates against a specific job requirement matrix using a **weighted rubric**:
+- **Relevant Experience (30pts):** Matching years and relevance of previous roles.
+- **Proof of Results (25pts):** Looking for quantified achievements.
+- **Skills Match (25pts):** Calculating the overlap between job requirements and candidate skills.
+- **Clarity & Professionalism (10pts):** Evaluating the quality of the resume content.
+- **Extras (10pts):** Certifications, portfolios, and unique projects.
+
+**Explainability:** For every candidate, the AI generates natural-language reasoning covering specific **Strengths** and **Weaknesses**, ensuring recruiters remain in control of the final hiring decision.
 
 ---
 
@@ -100,7 +164,7 @@ Built as part of the **Umurava 2026** challenge.
 
 ## Project Structure
 
-```
+```text
 scrutiq/
 ├── client/                   # React frontend (Vite + TypeScript)
 │   ├── src/
@@ -216,6 +280,13 @@ Run these from the **root** of the project:
 | `npm run dev` | Starts both frontend and backend together |
 | `npm run frontend` | Starts only the React dev server |
 | `npm run backend` | Starts only the Express server |
+
+---
+
+## 📝 Assumptions & Limitations
+- **File Types:** Currently supports PDF and DOCX for resumes.
+- **Language:** Optimized for English language profiles and job descriptions.
+- **Token Limits:** Screens candidates in batches to respect Gemini API rate limits.
 
 ---
 
