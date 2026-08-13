@@ -158,7 +158,6 @@ class AuthController {
 
       // Technical Repair: Bridging to Google's OpenSocial proxy container for direct branding fetch
       const profilePic = user.profilePic || `https://images1-focus-opensocial.googleusercontent.com/gadgets/proxy?container=focus&refresh=2592000&url=https://www.google.com/s2/photos/profile/${user.email}?sz=128`;
-
       return res.status(200).json({
 
         status: "success",
